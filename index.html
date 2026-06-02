@@ -985,6 +985,19 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 const { createClient } = supabase;
 const sb = createClient('https://kqlxgvvsxbicbrysnxjk.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtxbHhndnZzeGJpY2JyeXNueGprIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAzOTA2ODAsImV4cCI6MjA5NTk2NjY4MH0.nmAe7ivdQ4dXTctl5Is1MJclvt6_k-20Kvlm4bYQx1w');
 
+// Universal timeout wrapper for ALL Supabase calls
+async function withTimeout(promise, ms=7000, fallback=null){
+  try{
+    return await Promise.race([
+      promise,
+      new Promise((_,rej)=>setTimeout(()=>rej(new Error('DB timeout')), ms))
+    ]);
+  }catch(e){
+    console.warn('DB call failed/timeout:', e.message);
+    return fallback;
+  }
+}
+
 // ═══════════════════════════════════════════
 // PLAYERS DATA
 // ═══════════════════════════════════════════
@@ -1074,38 +1087,36 @@ function showError(msg){
 // SUPABASE HELPERS
 // ═══════════════════════════════════════════
 async function dbGetPassword(userId){
-  const {data} = await sb.from('passwords').select('password_hash').eq('user_id', userId).single();
+  const data = await withTimeout(sb.from('passwords').select('password_hash').eq('user_id', userId).single().then(r=>r.data), 7000, null);
   return data ? data.password_hash : null;
 }
 async function dbSetPassword(userId, hash){
-  await sb.from('passwords').upsert({user_id:userId, password_hash:hash, updated_at:new Date().toISOString()});
+  await withTimeout(sb.from('passwords').upsert({user_id:userId, password_hash:hash, updated_at:new Date().toISOString()}), 7000);
 }
 async function dbGetWellness(userId){
-  const {data} = await sb.from('wellness').select('*').eq('user_id', userId).order('created_at', {ascending:false});
+  const data = await withTimeout(sb.from('wellness').select('*').eq('user_id', userId).order('created_at',{ascending:false}).then(r=>r.data), 7000, []);
   return data||[];
 }
 async function dbSaveWellness(userId, entry){
-  // Delete existing entry for today then insert fresh
-  await sb.from('wellness').delete().eq('user_id', userId).eq('fecha', entry.fecha);
-  const {error} = await sb.from('wellness').insert({
-    user_id: userId,
-    fecha: entry.fecha, hora: entry.hora,
+  await withTimeout(sb.from('wellness').delete().eq('user_id', userId).eq('fecha', entry.fecha), 7000);
+  const result = await withTimeout(sb.from('wellness').insert({
+    user_id: userId, fecha: entry.fecha, hora: entry.hora,
     sueno: entry.sueno, energia: entry.energia,
     dolor: entry.dolor, animo: entry.animo,
     rpe: entry.rpe||null, zonas: entry.zonas||'Nada', nota: entry.nota||''
-  });
-  return !error;
+  }), 7000, {error:'timeout'});
+  return !result?.error;
 }
 async function dbGetAllWellnessToday(){
-  const {data} = await sb.from('wellness').select('*').eq('fecha', todayStr());
+  const data = await withTimeout(sb.from('wellness').select('*').eq('fecha', todayStr()).then(r=>r.data), 7000, []);
   return data||[];
 }
 async function dbGetAllWellness(){
-  const {data} = await sb.from('wellness').select('*').order('created_at', {ascending:false});
+  const data = await withTimeout(sb.from('wellness').select('*').order('created_at',{ascending:false}).then(r=>r.data), 7000, []);
   return data||[];
 }
 async function dbGetOverrides(){
-  const {data} = await sb.from('overrides').select('*');
+  const data = await withTimeout(sb.from('overrides').select('*').then(r=>r.data), 7000, []);
   const map = {};
   (data||[]).forEach(r=>{ map[r.user_id] = r; });
   return map;
@@ -1114,38 +1125,49 @@ async function dbSetOverride(userId, sem, indicacion){
   const update = {user_id:userId, updated_at:new Date().toISOString()};
   if(sem!==null) update.sem = sem;
   if(indicacion!==null) update.indicacion = indicacion;
-  await sb.from('overrides').upsert(update);
+  await withTimeout(sb.from('overrides').upsert(update), 7000);
 }
 async function dbGetFisioNotes(){
-  const {data} = await sb.from('fisio_notes').select('*');
+  const data = await withTimeout(sb.from('fisio_notes').select('*').then(r=>r.data), 7000, []);
   const map = {};
   (data||[]).forEach(r=>{ map[r.user_id] = r; });
   return map;
 }
 async function dbSaveFisioNote(userId, nota, fisioId){
-  await sb.from('fisio_notes').upsert({
+  await withTimeout(sb.from('fisio_notes').upsert({
     user_id: userId, nota: nota, fisio_id: fisioId,
     hora: new Date().toLocaleTimeString('es',{hour:'2-digit',minute:'2-digit'}),
     fecha: todayStr(), updated_at: new Date().toISOString()
-  });
+  }), 7000);
 }
 
 // Load all data into cache
 async function loadCache(){
-  const [overrides, fisioNotes] = await Promise.all([
-    dbGetOverrides(),
-    dbGetFisioNotes()
-  ]);
-  cache.overrides  = overrides;
-  cache.fisioNotes = fisioNotes;
+  try{
+    const [overrides, fisioNotes] = await Promise.all([
+      dbGetOverrides(),
+      dbGetFisioNotes()
+    ]);
+    cache.overrides  = overrides||{};
+    cache.fisioNotes = fisioNotes||{};
+  }catch(e){
+    console.warn('loadCache error:', e);
+    cache.overrides  = cache.overrides||{};
+    cache.fisioNotes = cache.fisioNotes||{};
+  }
 }
 async function loadWellnessCache(){
-  const allW = await dbGetAllWellness();
-  cache.wellness = {};
-  allW.forEach(e=>{
-    if(!cache.wellness[e.user_id]) cache.wellness[e.user_id]=[];
-    cache.wellness[e.user_id].push(e);
-  });
+  try{
+    const allW = await dbGetAllWellness();
+    cache.wellness = {};
+    (allW||[]).forEach(e=>{
+      if(!cache.wellness[e.user_id]) cache.wellness[e.user_id]=[];
+      cache.wellness[e.user_id].push(e);
+    });
+  }catch(e){
+    console.warn('loadWellnessCache error:', e);
+    cache.wellness = cache.wellness || {};
+  }
 }
 
 // ═══════════════════════════════════════════
@@ -1220,14 +1242,23 @@ async function doLogin(){
       }
     } else {
       currentUser = Object.assign({}, player, {initials:initials(player.name)});
-      const myW = await dbGetWellness(userId);
-      cache.wellness[userId] = myW;
+      try{
+        const myW = await Promise.race([
+          dbGetWellness(userId),
+          new Promise((_,rej)=>setTimeout(()=>rej(new Error('timeout')),6000))
+        ]);
+        cache.wellness[userId] = myW||[];
+      }catch(e){
+        console.warn('Wellness load timeout:', e);
+        cache.wellness[userId] = [];
+      }
       showWellness();
     }
   } catch(e){
-    hideLoading();
     showError('Error de conexión. Comprueba tu internet.');
     console.error(e);
+  } finally {
+    hideLoading();
   }
 }
 
@@ -1491,8 +1522,15 @@ async function showMedView(v){
   medView=v;
   ['hoy','equipo'].forEach(n=>{var e=document.getElementById('mn-'+n);if(e)e.classList.toggle('active',n===v);});
   showLoading('Cargando datos...');
-  await loadCache();
-  await loadWellnessCache();
+  try{
+    await Promise.race([
+      (async()=>{ await loadCache(); await loadWellnessCache(); })(),
+      new Promise((_,rej)=>setTimeout(()=>rej(new Error('timeout')),8000))
+    ]);
+  }catch(e){
+    console.warn('Cache load issue:', e);
+    // Continue anyway with whatever was loaded
+  }
   hideLoading();
   buildMedView(v);
   showScreen('s-medical');
