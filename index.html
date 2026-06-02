@@ -2,7 +2,9 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>Portal del Deportista – FEB 3×3 U21</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -794,6 +796,96 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
     .p-scores { flex-wrap: wrap; }
   }
 
+
+  .main-content{padding:14px;}
+  .topnav{padding:0 14px;height:54px;}
+  .nav-brand-text{font-size:14px;letter-spacing:1px;}
+  .nav-brand img{height:28px;}
+  .section-head{font-size:9px;margin:20px 0 12px;}
+  .field-group input,.field-group select{font-size:16px;padding:14px;}
+  .btn-primary{padding:15px;font-size:15px;}
+  .login-wrap{max-width:100%;}
+  .login-card{padding:24px 18px;border-radius:18px;}
+  .login-feb-logo img{width:80px;height:80px;}
+  .login-header h1{font-size:26px;}
+  .setpass-card{padding:24px 18px;border-radius:18px;margin:20px 14px;}
+  .kpi-row{grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:14px;}
+  .kpi{padding:14px 12px;border-radius:12px;}
+  .kpi-val{font-size:30px;}
+  .kpi-lbl{font-size:8px;letter-spacing:1.5px;}
+  .kpi-sub{font-size:9px;}
+  .p-card{padding:12px;border-radius:12px;gap:10px;}
+  .p-av{width:36px;height:36px;font-size:12px;}
+  .p-name{font-size:13px;}
+  .p-club{font-size:10px;}
+  .p-scores{gap:4px;margin-top:5px;flex-wrap:wrap;}
+  .p-score{font-size:10px;padding:2px 6px;border-radius:5px;}
+  .sem-badge{width:12px;height:12px;}
+  .staff-player-card{padding:12px;gap:10px;border-radius:12px;}
+  .staff-sem{width:14px;height:14px;}
+  .staff-indicacion{font-size:11px;padding:4px 9px;margin-top:5px;}
+  .wellness-hero{padding:16px;gap:12px;border-radius:14px;}
+  .wellness-hero-icon{font-size:30px;}
+  .wellness-hero h2{font-size:18px;}
+  .wellness-hero p{font-size:11px;}
+  .w-grid{grid-template-columns:1fr;gap:10px;}
+  .w-card{padding:16px;border-radius:14px;}
+  .w-card-title{font-size:13px;}
+  .w-card-sub{font-size:11px;}
+  .w-card-icon{width:34px;height:34px;font-size:16px;}
+  .emoji-scale{gap:4px;}
+  .emoji-btn{font-size:22px;padding:8px 2px;border-radius:10px;}
+  .emoji-btn .sc-lbl{font-size:9px;margin-top:4px;}
+  .pz-btn{font-size:11px;padding:6px 10px;}
+  .pain-zones{gap:6px;margin-top:10px;}
+  .w-textarea{font-size:14px;padding:12px;min-height:80px;}
+  .submit-btn{padding:16px;font-size:15px;border-radius:13px;margin-top:14px;}
+  input[type=range]{height:8px;}
+  input[type=range]::-webkit-slider-thumb{width:24px;height:24px;}
+  .profile-hero{padding:16px;border-radius:14px;gap:12px;}
+  .profile-name{font-size:24px;}
+  .meta-chip{font-size:10px;padding:4px 8px;}
+  .stats-grid{grid-template-columns:repeat(2,1fr);gap:8px;}
+  .stat-card{padding:14px 12px;border-radius:12px;}
+  .sc-value{font-size:28px;}
+  .wh-item{padding:12px 14px;border-radius:12px;}
+  .wh-chip{font-size:11px;padding:4px 8px;}
+  .wh-scores{gap:5px;flex-wrap:wrap;}
+  .modal-overlay{padding:0;align-items:flex-end;}
+  .modal-box{border-radius:22px 22px 0 0;max-height:88vh;padding:20px 16px 30px;width:100%;max-width:100%;}
+  .bottom-nav{padding-bottom:max(env(safe-area-inset-bottom),10px);}
+  .bn-btn{padding:10px 4px 8px;font-size:8px;gap:2px;}
+  .bn-btn svg{width:20px;height:20px;}
+  .pb{padding-bottom:68px;}
+  .empty-state{padding:28px 16px;border-radius:14px;}
+  @media(min-width:640px){
+    .main-content{padding:24px;max-width:1100px;margin:0 auto;}
+    .topnav{padding:0 24px;height:60px;}
+    .nav-brand-text{font-size:17px;}
+    .kpi-row{grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;}
+    .w-grid{grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px;}
+    .stats-grid{grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px;}
+    .bottom-nav{display:none;}
+    .pb{padding-bottom:0;}
+    .login-wrap{max-width:400px;}
+    .modal-overlay{padding:20px;align-items:center;}
+    .modal-box{border-radius:20px;max-height:85vh;max-width:500px;}
+    .field-group input{font-size:15px;}
+    .emoji-btn{font-size:18px;padding:9px 3px;}
+  }
+  @media(max-width:360px){
+    .emoji-btn .sc-lbl{display:none;}
+    .emoji-btn{font-size:24px;padding:10px 2px;}
+  }
+  .stat-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px 14px;position:relative;overflow:hidden;transition:border-color .2s,transform .2s;}
+  .stat-card:hover{border-color:rgba(232,97,10,.3);transform:translateY(-2px);}
+  .stat-card::after{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--red),var(--amber));}
+  .sc-label{font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:8px;}
+  .sc-value{font-family:'Bebas Neue',sans-serif;font-size:32px;color:#fff;line-height:1;}
+  .sc-unit{font-size:12px;font-weight:600;color:var(--muted);margin-left:2px;}
+  .sc-bar{margin-top:8px;height:4px;background:var(--bg3);border-radius:2px;overflow:hidden;}
+  .sc-bar-fill{height:100%;border-radius:2px;background:linear-gradient(90deg,var(--red),var(--amber));transition:width 1s ease;}
+
 </style>
 </head>
 <body>
@@ -978,110 +1070,61 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 
 
 <script>
-
-// ═══════════════════════════════════════════
-// SUPABASE
-// ═══════════════════════════════════════════
 const { createClient } = supabase;
 const sb = createClient('https://kqlxgvvsxbicbrysnxjk.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtxbHhndnZzeGJpY2JyeXNueGprIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAzOTA2ODAsImV4cCI6MjA5NTk2NjY4MH0.nmAe7ivdQ4dXTctl5Is1MJclvt6_k-20Kvlm4bYQx1w');
 
-// Universal timeout wrapper for ALL Supabase calls
 async function withTimeout(promise, ms=7000, fallback=null){
   try{
-    return await Promise.race([
-      promise,
-      new Promise((_,rej)=>setTimeout(()=>rej(new Error('DB timeout')), ms))
-    ]);
-  }catch(e){
-    console.warn('DB call failed/timeout:', e.message);
-    return fallback;
-  }
+    return await Promise.race([promise, new Promise((_,rej)=>setTimeout(()=>rej(new Error('timeout')),ms))]);
+  }catch(e){ console.warn('DB timeout:',e.message); return fallback; }
 }
 
-// ═══════════════════════════════════════════
-// PLAYERS DATA
-// ═══════════════════════════════════════════
 const PLAYERS_FEM = [
-  {id:'sofia.alonso',     name:'Sofía Alonso',       club:'California Baptist University', gender:'fem'},
-  {id:'irene.asensio',    name:'Irene Asensio',       club:'Ohio University',               gender:'fem'},
-  {id:'jana.nogues',      name:'Jana Nogués',          club:'Universidad Valparaíso',        gender:'fem'},
-  {id:'judit.valero',     name:'Judit Valero',         club:'Butler University',             gender:'fem'},
-  {id:'davinia.mindouidi',name:'Davinia Mindouidi',   club:'Providence College',            gender:'fem'},
-  {id:'marina.mata',      name:'Marina Mata',          club:'La Seu',                        gender:'fem'},
-  {id:'judith.oliva',     name:'Judith Oliva',         club:'University of Toledo',          gender:'fem'},
-  {id:'blau.tor',         name:'Blau Tor',             club:'Columbia University',           gender:'fem'},
-  {id:'andrea.naranjo',   name:'Andrea Naranjo',       club:'CB Gran Canaria',               gender:'fem'},
+  {id:'sofia.alonso',name:'Sofía Alonso',club:'California Baptist University',gender:'fem'},
+  {id:'irene.asensio',name:'Irene Asensio',club:'Ohio University',gender:'fem'},
+  {id:'jana.nogues',name:'Jana Nogués',club:'Universidad Valparaíso',gender:'fem'},
+  {id:'judit.valero',name:'Judit Valero',club:'Butler University',gender:'fem'},
+  {id:'davinia.mindouidi',name:'Davinia Mindouidi',club:'Providence College',gender:'fem'},
+  {id:'marina.mata',name:'Marina Mata',club:'La Seu',gender:'fem'},
+  {id:'judith.oliva',name:'Judith Oliva',club:'University of Toledo',gender:'fem'},
+  {id:'blau.tor',name:'Blau Tor',club:'Columbia University',gender:'fem'},
+  {id:'andrea.naranjo',name:'Andrea Naranjo',club:'CB Gran Canaria',gender:'fem'},
 ];
 const PLAYERS_MAS = [
-  {id:'eduard.coll',        name:'Eduard Coll',        club:'Homs UE Mataró',                gender:'mas'},
-  {id:'juanmanuel.martin',  name:'Juan Manuel Martín', club:'Rigalli Alginet',               gender:'mas'},
-  {id:'jorge.garcia',       name:'Jorge García',        club:'CB Náutico de Tenerife',        gender:'mas'},
-  {id:'aleix.sempere',      name:'Aleix Sempere',       club:'Iowa Central Community College',gender:'mas'},
-  {id:'ferran.torreblanca', name:'Ferran Torreblanca', club:'Baxi Manresa',                  gender:'mas'},
-  {id:'daniel.rodriguez',   name:'Daniel Rodríguez',   club:'Burgos Grupo de Santiago',      gender:'mas'},
-  {id:'urko.madariaga',     name:'Urko Madariaga',      club:'Bilbao Basket',                 gender:'mas'},
-  {id:'nicolas.ferrer',     name:'Nicolás Ferrer',      club:'Homs UE Mataró',                gender:'mas'},
-  {id:'carlos.valera',      name:'Carlos Valera',       club:'Leyma Coruña',                  gender:'mas'},
-  {id:'marcos.pacheco',     name:'Marcos Pacheco',      club:'David & Elkins College NCAA',   gender:'mas'},
+  {id:'eduard.coll',name:'Eduard Coll',club:'Homs UE Mataró',gender:'mas'},
+  {id:'juanmanuel.martin',name:'Juan Manuel Martín',club:'Rigalli Alginet',gender:'mas'},
+  {id:'jorge.garcia',name:'Jorge García',club:'CB Náutico de Tenerife',gender:'mas'},
+  {id:'aleix.sempere',name:'Aleix Sempere',club:'Iowa Central Community College',gender:'mas'},
+  {id:'ferran.torreblanca',name:'Ferran Torreblanca',club:'Baxi Manresa',gender:'mas'},
+  {id:'daniel.rodriguez',name:'Daniel Rodríguez',club:'Burgos Grupo de Santiago',gender:'mas'},
+  {id:'urko.madariaga',name:'Urko Madariaga',club:'Bilbao Basket',gender:'mas'},
+  {id:'nicolas.ferrer',name:'Nicolás Ferrer',club:'Homs UE Mataró',gender:'mas'},
+  {id:'carlos.valera',name:'Carlos Valera',club:'Leyma Coruña',gender:'mas'},
+  {id:'marcos.pacheco',name:'Marcos Pacheco',club:'David & Elkins College NCAA',gender:'mas'},
 ];
-const ALL_PLAYERS = [...PLAYERS_FEM, ...PLAYERS_MAS];
-const STAFF = [
-  {id:'david.araguas',     name:'Dr. David Araguás',  role:'medico', initials:'DA', team:'all'},
-  {id:'sandra.ygueravide', name:'Sandra Ygueravide',  role:'staff',  initials:'SY', cargo:'Seleccionadora FEM', team:'fem'},
-  {id:'andrea.ramos',      name:'Andrea Ramos',        role:'staff',  initials:'AR', cargo:'Entrenadora FEM',    team:'fem'},
-  {id:'pedro.melendez',    name:'Pedro Meléndez',      role:'staff',  initials:'PM', cargo:'Seleccionador MAS',  team:'mas'},
-  {id:'juanma.robles',     name:'Juanma Robles',       role:'staff',  initials:'JR', cargo:'Entrenador MAS',     team:'mas'},
-  {id:'ana.martin',        name:'Ana Martín',           role:'fisio',  initials:'AM', cargo:'Fisioterapeuta FEM', team:'fem'},
-  {id:'jaime.antoni',      name:'Jaime Antoni',         role:'fisio',  initials:'JA', cargo:'Fisioterapeuta MAS', team:'mas'},
+const ALL_PLAYERS=[...PLAYERS_FEM,...PLAYERS_MAS];
+const STAFF=[
+  {id:'david.araguas',name:'Dr. David Araguás',role:'medico',initials:'DA',team:'all'},
+  {id:'sandra.ygueravide',name:'Sandra Ygueravide',role:'staff',initials:'SY',cargo:'Seleccionadora FEM',team:'fem'},
+  {id:'andrea.ramos',name:'Andrea Ramos',role:'staff',initials:'AR',cargo:'Entrenadora FEM',team:'fem'},
+  {id:'pedro.melendez',name:'Pedro Meléndez',role:'staff',initials:'PM',cargo:'Seleccionador MAS',team:'mas'},
+  {id:'juanma.robles',name:'Juanma Robles',role:'staff',initials:'JR',cargo:'Entrenador MAS',team:'mas'},
+  {id:'ana.martin',name:'Ana Martín',role:'fisio',initials:'AM',cargo:'Fisioterapeuta FEM',team:'fem'},
+  {id:'jaime.antoni',name:'Jaime Antoni',role:'fisio',initials:'JA',cargo:'Fisioterapeuta MAS',team:'mas'},
 ];
 
-// ═══════════════════════════════════════════
-// STATE
-// ═══════════════════════════════════════════
-let currentUser  = null;
-let pendingUserId = null;
-let wSelections  = {sueno:null, energia:null, dolor:null, animo:null};
-let medView      = 'hoy';
+let currentUser=null,pendingUserId=null,medView='hoy';
+let wSelections={sueno:null,energia:null,dolor:null,animo:null};
+let cache={wellness:{},overrides:{},fisioNotes:{}};
 
-// In-memory cache (refresh on each view load)
-let cache = {wellness:{}, overrides:{}, fisioNotes:{}};
-
-// ═══════════════════════════════════════════
-// UTILS
-// ═══════════════════════════════════════════
-function initials(name){
-  return name.split(' ').filter(w=>w.length>2).slice(0,2).map(w=>w[0].toUpperCase()).join('');
-}
-function avColor(gender){
-  return gender==='fem'
-    ? 'background:linear-gradient(135deg,#ec4899,#a0005e)'
-    : 'background:linear-gradient(135deg,#3b82f6,#1d4ed8)';
-}
-function sdClass(v){ return ['','sd1','sd2','sd3','sd4','sd5'][v]||''; }
-function sdEmoji(v){ return ['😞','😟','😐','🙂','😊'][v-1]||'–'; }
-function todayStr(){
-  const d=new Date();
-  return d.getDate().toString().padStart(2,'0')+'/'+
-         (d.getMonth()+1).toString().padStart(2,'0')+'/'+
-         d.getFullYear().toString().slice(2);
-}
-function showScreen(id){
-  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
-}
-function showLoading(msg){
-  document.getElementById('loading-overlay').style.display='flex';
-  document.getElementById('loading-msg').textContent = msg||'Cargando...';
-}
-function hideLoading(){
-  document.getElementById('loading-overlay').style.display='none';
-}
-function showError(msg){
-  const el = document.getElementById('li-err');
-  el.textContent = msg;
-  el.style.display = 'block';
-  setTimeout(()=>el.style.display='none', 4000);
-}
+function initials(n){return n.split(' ').filter(w=>w.length>2).slice(0,2).map(w=>w[0].toUpperCase()).join('');}
+function avColor(g){return g==='fem'?'background:linear-gradient(135deg,#ec4899,#a0005e)':'background:linear-gradient(135deg,#3b82f6,#1d4ed8)';}
+function sdClass(v){return['','sd1','sd2','sd3','sd4','sd5'][v]||'';}
+function todayStr(){const d=new Date();return d.getDate().toString().padStart(2,'0')+'/'+(d.getMonth()+1).toString().padStart(2,'0')+'/'+d.getFullYear().toString().slice(2);}
+function showScreen(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');}
+function showLoading(msg){document.getElementById('loading-overlay').style.display='flex';document.getElementById('loading-msg').textContent=msg||'Cargando...';}
+function hideLoading(){document.getElementById('loading-overlay').style.display='none';}
+function showError(msg){const el=document.getElementById('li-err');el.textContent=msg;el.style.display='block';setTimeout(()=>el.style.display='none',4000);}
 
 // ═══════════════════════════════════════════
 // SUPABASE HELPERS
@@ -1500,6 +1543,32 @@ function showPlayerProfile(){
         (e.zonas&&e.zonas!=='Nada'?'<div class="wh-chip">📍 '+e.zonas+'</div>':'')+
         '</div>'+(e.nota?'<div class="wh-nota">💬 '+e.nota+'</div>':'')+'</div>').join('');
 
+  // Anthropometry data (placeholder until medico fills it in)
+  const antro = currentUser.antro || null;
+  var antroHTML = '';
+  if(antro){
+    antroHTML = '<div class="stats-grid a2">';
+    var fields = [
+      {label:'Talla', value:antro.talla, unit:'cm'},
+      {label:'Peso',  value:antro.peso,  unit:'kg'},
+      {label:'IMC',   value:antro.imc,   unit:''},
+      {label:'% Grasa', value:antro.grasa, unit:'%'},
+      {label:'Masa Musc.', value:antro.musculo, unit:'kg'},
+      {label:'Enverg.', value:antro.envergadura, unit:'cm'},
+    ];
+    fields.forEach(function(f){
+      if(!f.value) return;
+      antroHTML += '<div class="stat-card">';
+      antroHTML += '<div class="sc-label">'+f.label+'</div>';
+      antroHTML += '<div class="sc-value">'+f.value+'<span class="sc-unit">'+f.unit+'</span></div>';
+      antroHTML += '<div class="sc-bar"><div class="sc-bar-fill" style="width:65%"></div></div>';
+      antroHTML += '</div>';
+    });
+    antroHTML += '</div>';
+  } else {
+    antroHTML = '<div class="empty-state a2"><div class="es-icon">📐</div><h3>Próximamente</h3><p>Tu médico añadirá tu antropometría durante la concentración.</p></div>';
+  }
+
   document.getElementById('player-content').innerHTML=
     '<div class="profile-hero a1">'+
     '<div><div style="margin-bottom:6px;font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted)">'+
@@ -1508,8 +1577,10 @@ function showPlayerProfile(){
     '<div class="profile-meta"><div class="meta-chip">🏀 '+currentUser.club+'</div>'+
     '<div class="meta-chip" style="'+genderBadge+'">'+(currentUser.gender==='fem'?'FEM':'MAS')+'</div></div></div>'+
     '</div>'+
-    '<div class="section-head a2">📋 Mis Wellness</div>'+
-    '<div class="a2">'+histHTML+'</div>'+
+    '<div class="section-head a2">📐 Antropometría</div>'+
+    antroHTML+
+    '<div class="section-head a3">📋 Mis Wellness</div>'+
+    '<div class="a3">'+histHTML+'</div>'+
     '<div style="height:8px"></div>';
 
   showScreen('s-player');
@@ -1796,10 +1867,11 @@ async function buildStaffView(){
     var ind=getIndicacion(p.id);
     var fisioNota=getFisioNote(p.id), fisioTime=getFisioNoteTime(p.id);
     var bc=sem==='rojo'?'rojo-border':sem==='amarillo'?'amarillo-border':sem==='verde'?'verde-border':'';
-    var c='<div class="staff-player-card '+bc+' '+anim+'">';
-    c+='<div class="p-av" style="'+avColor(p.gender)+'">'+initials(p.name)+'</div>';
-    c+='<div class="p-info" style="width:100%;min-width:0"><div class="p-name">'+p.name+'</div>';
-    c+='<div class="p-club">🏀 '+p.club+'</div>';
+    var c='<div class="staff-player-card '+bc+' '+anim+'" style="transition:all .2s">';
+    c+='<div class="p-av" style="'+avColor(p.gender)+';width:42px;height:42px;font-size:14px;flex-shrink:0">'+initials(p.name)+'</div>';
+    c+='<div class="p-info" style="width:100%;min-width:0">';
+    c+='<div style="font-size:14px;font-weight:700;color:var(--text)">'+p.name+'</div>';
+    c+='<div style="font-size:11px;color:var(--muted);margin-top:1px">🏀 '+p.club+'</div>';
     if(isFisio){
       if(ind) c+='<div class="staff-indicacion has-nota" style="margin-top:6px"><span style="font-size:9px;font-weight:800;letter-spacing:1px;text-transform:uppercase;margin-right:4px">👨‍⚕️ Médico</span>'+ind+'</div>';
       c+='<div style="margin-top:8px"><div style="font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:5px">🤲 Tu nota de fisio</div>';
@@ -1812,17 +1884,37 @@ async function buildStaffView(){
       if(fisioNota) c+='<div class="staff-indicacion" style="margin-top:5px;display:flex;align-items:flex-start;gap:5px;color:var(--teal);border-color:rgba(20,184,166,.25);background:rgba(20,184,166,.06)"><span style="font-size:10px;font-weight:800;letter-spacing:.5px;white-space:nowrap;color:var(--teal)">🤲 Fisio</span><span style="font-size:12px;color:var(--text)">'+fisioNota+'</span></div>';
     }
     c+='</div>';
-    if(sem) c+='<div class="staff-sem '+sem+'"></div>';
-    else    c+='<div class="staff-sem" style="background:var(--border2)"></div>';
+    if(sem) c+='<div class="staff-sem '+sem+'" style="width:16px;height:16px;flex-shrink:0"></div>';
+    else    c+='<div class="staff-sem" style="background:var(--border2);width:16px;height:16px;flex-shrink:0"></div>';
     c+='</div>'; return c;
   }
 
-  var html='<div class="a1"><div class="page-title">Estado del <em>Equipo</em></div>';
-  html+='<div class="page-sub">'+currentUser.cargo+' · '+todayStr()+'</div></div>';
-  html+='<div class="kpi-row a2">';
-  html+='<div class="kpi kr"><div class="kpi-lbl">Alerta</div><div class="kpi-val">'+rojos.length+'</div></div>';
-  html+='<div class="kpi ky"><div class="kpi-lbl">Revisar</div><div class="kpi-val">'+amarillos.length+'</div></div>';
-  html+='<div class="kpi kg"><div class="kpi-lbl">Aptos</div><div class="kpi-val">'+verdes.length+'</div></div>';
+  var totalChecked = myPlayers.filter(function(p){
+    return (cache.wellness[p.id]||[]).find(function(e){return e.fecha===todayStr();});
+  }).length;
+
+  var html='<div class="a1">';
+  html+='<div style="display:flex;align-items:center;gap:12px;margin-bottom:4px">';
+  html+='<div style="font-family:Bebas Neue,sans-serif;font-size:clamp(26px,5vw,38px);letter-spacing:2px;line-height:1">Estado del <span style="color:var(--orange)">Equipo</span></div>';
+  html+='</div>';
+  html+='<div style="font-size:11px;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:20px">'+currentUser.cargo+' · '+todayStr()+'</div>';
+  html+='</div>';
+
+  // Hero summary bar
+  html+='<div style="background:var(--card);border:1px solid var(--border);border-radius:16px;padding:18px 20px;margin-bottom:20px;display:flex;gap:0;overflow:hidden;position:relative" class="a1">';
+  html+='<div style="position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--red),var(--orange),var(--amber))"></div>';
+  var statItems = [
+    {n:rojos.length,    label:'Alerta',  color:'#f87171',       bg:'rgba(248,113,113,.1)'},
+    {n:amarillos.length,label:'Revisar', color:'var(--yellow)', bg:'rgba(234,179,8,.1)'},
+    {n:verdes.length,   label:'Aptos',   color:'var(--green)',  bg:'rgba(34,197,94,.1)'},
+    {n:totalChecked+'/'+myPlayers.length, label:'Wellness', color:'var(--muted2)', bg:'transparent'},
+  ];
+  statItems.forEach(function(s){
+    html+='<div style="flex:1;text-align:center;padding:8px 4px;background:'+s.bg+';border-radius:8px;margin:0 3px">';
+    html+='<div style="font-family:Bebas Neue,sans-serif;font-size:30px;color:'+s.color+';line-height:1">'+s.n+'</div>';
+    html+='<div style="font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-top:2px">'+s.label+'</div>';
+    html+='</div>';
+  });
   html+='</div>';
   if(rojos.length)    html+='<div class="section-head a2" style="color:#f87171">🔴 Atención inmediata</div>'+rojos.map(p=>staffCard(p,'a2')).join('');
   if(amarillos.length)html+='<div class="section-head a3" style="color:var(--yellow)">🟡 Revisar hoy</div>'+amarillos.map(p=>staffCard(p,'a3')).join('');
@@ -1863,6 +1955,7 @@ async function buildStaffView(){
   style.textContent='@keyframes spin{to{transform:rotate(360deg)}}';
   document.head.appendChild(style);
 })();
+
 
 </script>
 </body>
