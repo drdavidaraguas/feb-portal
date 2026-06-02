@@ -1976,7 +1976,7 @@ function renderMedHoy(){
 
   function makeCard(p){
     var hoy=getHoy(p), sem=getSem(p);
-    var bc=sem==='rojo'?'rojo-border':sem==='amarillo'?'amarillo-border':'';
+    var bc=sem==='rojo'?'rojo-border':sem==='amarillo'?'amarillo-border':sem==='verde'?'verde-border':'';
     var fisioNota=getFisioNote(p.id), fisioTime=getFisioNoteTime(p.id);
     var c='<div class="p-card '+bc+'" data-pid="'+p.id+'">';
     c+='<div class="p-av" style="'+avColor(p.gender)+'">'+initials(p.name)+'</div>';
@@ -2078,7 +2078,7 @@ function renderMedEquipo(){
   function makeHistCard(p){
     var entries=cache.wellness[p.id]||[];
     var last=entries[0], sem=getEffectiveSem(p.id)||calcSemaforo(last);
-    var bc=sem==='rojo'?'rojo-border':sem==='amarillo'?'amarillo-border':'';
+    var bc=sem==='rojo'?'rojo-border':sem==='amarillo'?'amarillo-border':sem==='verde'?'verde-border':'';
     return '<div class="p-card '+bc+'" data-pid="'+p.id+'">'+
       '<div class="p-av" style="'+avColor(p.gender)+'">'+initials(p.name)+'</div>'+
       '<div class="p-info"><div class="p-name">'+p.name+'</div>'+
