@@ -812,8 +812,8 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
   .setpass-card{padding:24px 18px;border-radius:18px;margin:20px 14px;}
   .kpi-row{grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:14px;}
   .kpi{padding:14px 12px;border-radius:12px;}
-  .kpi-val{font-size:30px;}
-  .kpi-lbl{font-size:8px;letter-spacing:1.5px;}
+  .kpi-val{font-size:32px;font-family:'Bebas Neue',sans-serif;letter-spacing:1px;}
+  .kpi-lbl{font-size:8px;letter-spacing:2px;text-transform:uppercase;font-weight:700;}
   .kpi-sub{font-size:9px;}
   .p-card{padding:12px;border-radius:12px;gap:10px;transition:border-color .2s,transform .15s;}
   .p-card:active{transform:scale(0.99);}
@@ -901,8 +901,12 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 
   /* Gradient top border on all main cards */
   .p-card { position: relative; overflow: hidden; }
+  .p-card.rojo-border { border-color: rgba(248,113,113,.4); }
   .p-card.rojo-border::before { content:''; position:absolute; top:0; left:0; right:0; height:2px; background:linear-gradient(90deg,#f87171,#fca5a5); }
+  .p-card.amarillo-border { border-color: rgba(234,179,8,.35); }
   .p-card.amarillo-border::before { content:''; position:absolute; top:0; left:0; right:0; height:2px; background:linear-gradient(90deg,#eab308,#fde047); }
+  .p-card.verde-border { border-color: rgba(34,197,94,.3); }
+  .p-card.verde-border::before { content:''; position:absolute; top:0; left:0; right:0; height:2px; background:linear-gradient(90deg,#22c55e,#86efac); }
 
   /* KPI hover glow */
   .kpi:hover { transform: translateY(-2px); }
@@ -1833,20 +1837,17 @@ function showPlayerProfile(){
       '</div>';
   }
 
-  // ── SEMAFORO (visual only) ──
-  var semOrder3 = ['rojo','amarillo','verde'];
+  // ── SEMAFORO (single dot) ──
   var semColorMap3 = {verde:'34,197,94', amarillo:'234,179,8', rojo:'248,113,113'};
-  var semBlock2 = '<div style="display:flex;align-items:center;flex-shrink:0">';
-  semBlock2 += '<div style="background:var(--bg3);border:1px solid var(--border);border-radius:20px;padding:12px 10px;display:flex;flex-direction:column;align-items:center;gap:7px">';
-  semOrder3.forEach(function(s){
-    var c2 = semColorMap3[s];
-    if(s===sem){
-      semBlock2 += '<div style="width:20px;height:20px;border-radius:50%;background:rgba('+c2+',1);box-shadow:0 0 14px 4px rgba('+c2+',.5);border:2px solid rgba('+c2+',.8)"></div>';
-    } else {
-      semBlock2 += '<div style="width:13px;height:13px;border-radius:50%;background:rgba('+c2+',.1);border:1.5px solid rgba('+c2+',.2)"></div>';
-    }
-  });
-  semBlock2 += '</div></div>';
+  var semBlock2 = '';
+  if(sem){
+    var sc = semColorMap3[sem];
+    semBlock2 = '<div style="display:flex;align-items:center;justify-content:center;flex-shrink:0;padding:4px">';
+    semBlock2 += '<div style="width:18px;height:18px;border-radius:50%;background:rgba('+sc+',1);';
+    semBlock2 += 'box-shadow:0 0 14px 4px rgba('+sc+',.5),0 0 4px rgba('+sc+',.9);';
+    semBlock2 += 'border:2px solid rgba('+sc+',.8)"></div>';
+    semBlock2 += '</div>';
+  }
 
   // ── RECOS (from DB or placeholder) ──
   var dbRec = getRecos(currentUser.id);
@@ -2012,10 +2013,10 @@ function renderMedHoy(){
   out+='<div class="kpi kg"><div class="kpi-lbl">Aptos</div><div class="kpi-val">'+verdes.length+'</div><div class="kpi-sub">Sin alertas</div></div>';
   out+='<div class="kpi kb"><div class="kpi-lbl">Wellness</div><div class="kpi-val">'+conW.length+'/'+ALL_PLAYERS.length+'</div><div class="kpi-sub">Recibidos</div></div>';
   out+='</div>';
-  if(rojos.length)    out+='<div class="section-head a3" style="color:#f87171">🔴 Atención inmediata</div>'+grp(rojos);
-  if(amarillos.length)out+='<div class="section-head a3" style="color:var(--yellow)">🟡 Revisar hoy</div>'+grp(amarillos);
-  if(verdes.length)   out+='<div class="section-head a3" style="color:var(--green)">🟢 Aptos</div>'+grp(verdes);
-  if(sinDatos.length) out+='<div class="section-head a3">⏳ Sin Wellness</div>'+grp(sinDatos);
+  if(rojos.length)    out+='<div class="section-head a3" style="color:#f87171;font-size:10px">● Atención inmediata</div>'+grp(rojos);
+  if(amarillos.length)out+='<div class="section-head a3" style="color:var(--yellow);font-size:10px">● Revisar hoy</div>'+grp(amarillos);
+  if(verdes.length)   out+='<div class="section-head a3" style="color:var(--green);font-size:10px">● Aptos</div>'+grp(verdes);
+  if(sinDatos.length) out+='<div class="section-head a3" style="color:var(--muted)">● Sin Wellness</div>'+grp(sinDatos);
   out+='<div style="height:8px"></div>';
   return out;
 }
@@ -2300,9 +2301,9 @@ async function buildStaffView(){
   html+='<div class="kpi kb"><div class="kpi-lbl">Wellness</div><div class="kpi-val">'+totalChecked+'/'+myPlayers.length+'</div><div class="kpi-sub">Recibidos</div></div>';
   html+='</div>';
   if(rojos.length)    html+='<div class="section-head a2" style="color:#f87171">🔴 Atención inmediata</div>'+rojos.map(p=>staffCard(p,'a2')).join('');
-  if(amarillos.length)html+='<div class="section-head a3" style="color:var(--yellow)">🟡 Revisar hoy</div>'+amarillos.map(p=>staffCard(p,'a3')).join('');
-  if(verdes.length)   html+='<div class="section-head a3" style="color:var(--green)">🟢 Aptos</div>'+verdes.map(p=>staffCard(p,'a3')).join('');
-  if(sinDatos.length) html+='<div class="section-head a3">⏳ Sin Wellness</div>'+sinDatos.map(p=>staffCard(p,'a3')).join('');
+  if(amarillos.length)html+='<div class="section-head a3" style="color:var(--yellow);font-size:10px">● Revisar hoy</div>'+amarillos.map(p=>staffCard(p,'a3')).join('');
+  if(verdes.length)   html+='<div class="section-head a3" style="color:var(--green);font-size:10px">● Aptos</div>'+verdes.map(p=>staffCard(p,'a3')).join('');
+  if(sinDatos.length) html+='<div class="section-head a3" style="color:var(--muted)">● Sin Wellness</div>'+sinDatos.map(p=>staffCard(p,'a3')).join('');
   html+='<div style="height:8px"></div>';
   el.innerHTML=html;
 
