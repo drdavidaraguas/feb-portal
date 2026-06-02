@@ -889,6 +889,162 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
     .emoji-btn{font-size:24px;padding:10px 2px;}
   }
 
+
+  /* ══ AESTHETIC OVERHAUL ══ */
+
+  /* Smoother card interactions */
+  .p-card, .staff-player-card, .wh-item, .w-card, .kpi {
+    transition: border-color .2s, transform .15s, box-shadow .2s;
+  }
+  .p-card:hover { border-color: rgba(232,97,10,.25); }
+  .staff-player-card:hover { border-color: rgba(232,97,10,.2); }
+
+  /* Gradient top border on all main cards */
+  .p-card { position: relative; overflow: hidden; }
+  .p-card.rojo-border::before { content:''; position:absolute; top:0; left:0; right:0; height:2px; background:linear-gradient(90deg,#f87171,#fca5a5); }
+  .p-card.amarillo-border::before { content:''; position:absolute; top:0; left:0; right:0; height:2px; background:linear-gradient(90deg,#eab308,#fde047); }
+
+  /* KPI hover glow */
+  .kpi:hover { transform: translateY(-2px); }
+  .kpi.kg:hover { box-shadow: 0 4px 20px rgba(34,197,94,.15); }
+  .kpi.ky:hover { box-shadow: 0 4px 20px rgba(234,179,8,.15); }
+  .kpi.kr:hover { box-shadow: 0 4px 20px rgba(248,113,113,.15); }
+  .kpi.kb:hover { box-shadow: 0 4px 20px rgba(59,130,246,.15); }
+
+  /* Wellness card focus */
+  .w-card { transition: border-color .2s; }
+  .w-card:focus-within { border-color: rgba(232,97,10,.3); }
+
+  /* Login card shine effect */
+  .login-card::after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle at 30% 30%, rgba(255,255,255,.04) 0%, transparent 60%);
+    pointer-events: none;
+  }
+
+  /* Better empty state */
+  .empty-state {
+    border: 1px dashed var(--border2);
+    background: rgba(255,255,255,.01);
+  }
+
+  /* Recos player card */
+  .reco-player-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+    transition: border-color .2s;
+  }
+  .reco-player-card:hover { border-color: rgba(232,97,10,.25); }
+  .reco-player-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 16px;
+    background: rgba(255,255,255,.02);
+    border-bottom: 1px solid var(--border);
+  }
+  .reco-player-card > div:not(.reco-player-header):not([data-save-reco]) {
+    padding: 0 16px;
+  }
+  .reco-player-card textarea {
+    background: var(--bg3) !important;
+    border-color: var(--border) !important;
+    transition: border-color .2s, box-shadow .2s;
+  }
+  .reco-player-card textarea:focus {
+    border-color: rgba(232,97,10,.4) !important;
+    box-shadow: 0 0 0 3px rgba(232,97,10,.08) !important;
+  }
+  .reco-player-card > [data-save-reco] {
+    display: block;
+    margin: 12px 16px 16px;
+    width: calc(100% - 32px);
+  }
+
+  /* Topnav brand */
+  .nav-brand { gap: 10px; }
+  .nav-brand-text { 
+    font-family: 'Bebas Neue', sans-serif;
+    letter-spacing: 1.5px;
+    background: linear-gradient(135deg, #fff 40%, rgba(245,166,35,.8));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* Bottom nav active indicator */
+  .bn-btn.active {
+    color: var(--orange);
+    position: relative;
+  }
+  .bn-btn.active::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 20%; right: 20%;
+    height: 2px;
+    background: linear-gradient(90deg, var(--red), var(--orange));
+    border-radius: 0 0 2px 2px;
+  }
+
+  /* Semaforo badges glow on hover */
+  .sem-badge.verde:hover  { box-shadow: 0 0 12px 3px rgba(34,197,94,.6); }
+  .sem-badge.amarillo:hover { box-shadow: 0 0 12px 3px rgba(234,179,8,.6); }
+  .sem-badge.rojo:hover   { box-shadow: 0 0 12px 3px rgba(248,113,113,.6); }
+
+  /* Pill indicator for no wellness */
+  .no-wellness {
+    background: rgba(139,148,158,.08);
+    border: 1px dashed rgba(139,148,158,.25);
+  }
+
+  /* Success screen */
+  .success-wrap .success-icon { animation: bounceIn .5s cubic-bezier(.36,.07,.19,.97) both; }
+  @keyframes bounceIn {
+    0%  { transform: scale(0.3); opacity: 0; }
+    50% { transform: scale(1.1); }
+    80% { transform: scale(0.9); }
+    100%{ transform: scale(1);   opacity: 1; }
+  }
+
+  /* Page title gradient */
+  .page-title em {
+    background: linear-gradient(135deg, var(--orange), var(--amber));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-style: normal;
+  }
+
+  /* Smooth scroll */
+  html { scroll-behavior: smooth; }
+  .main-content { scroll-behavior: smooth; }
+
+  /* Better pass input */
+  .pass-input-wrap { position: relative; }
+  .pass-input-wrap input { padding-right: 44px; }
+  .pass-toggle {
+    position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
+    background: none; border: none; cursor: pointer;
+    color: var(--muted); transition: color .2s; padding: 4px;
+  }
+  .pass-toggle:hover { color: var(--orange); }
+
+  /* Login tag */
+  .login-tag { color: var(--muted2); letter-spacing: 1px; }
+
+  /* reco fields padding fix on mobile */
+  @media(max-width:639px){
+    .reco-player-card > div:not(.reco-player-header) { padding: 0 12px; }
+    .reco-player-card > [data-save-reco] { margin: 10px 12px 14px; width: calc(100% - 24px); }
+  }
+
 </style>
 </head>
 <body>
@@ -1034,6 +1190,10 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
     <button class="bn-btn" id="mn-equipo" onclick="showMedView('equipo')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
       Equipo
+    </button>
+    <button class="bn-btn" id="mn-recos" onclick="showMedView('recos')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
+      Recos
     </button>
   </nav>
 </div>
@@ -1756,7 +1916,7 @@ function showPlayerProfile(){
 // ═══════════════════════════════════════════
 async function showMedView(v){
   medView=v;
-  ['hoy','equipo'].forEach(n=>{var e=document.getElementById('mn-'+n);if(e)e.classList.toggle('active',n===v);});
+  ['hoy','equipo','recos'].forEach(n=>{var e=document.getElementById('mn-'+n);if(e)e.classList.toggle('active',n===v);});
   showLoading('Cargando datos...');
   try{
     await Promise.race([
@@ -1777,10 +1937,30 @@ function buildMedView(v){
   if(!el) return;
   if(v==='hoy')    el.innerHTML=renderMedHoy();
   if(v==='equipo') el.innerHTML=renderMedEquipo();
+  if(v==='recos')  el.innerHTML=renderMedRecos();
   el.onclick=function(e){
     var card=e.target.closest('[data-pid]');
     if(card) openModal(card.getAttribute('data-pid'));
   };
+  // Attach recos save buttons
+  if(v==='recos'){
+    el.querySelectorAll('[data-save-reco]').forEach(function(btn){
+      btn.addEventListener('click', async function(){
+        var pid = this.getAttribute('data-save-reco');
+        var fields = el.querySelectorAll('[data-reco-pid="'+pid+'"]');
+        var recData = {};
+        fields.forEach(function(f){ recData[f.getAttribute('data-reco-key')] = f.value.trim(); });
+        this.textContent='Enviando...'; this.disabled=true;
+        await dbSaveRecos(pid, recData);
+        if(!cache.recos) cache.recos={};
+        cache.recos[pid] = Object.assign({},recData,{enviado:true});
+        this.textContent='✓ Enviadas'; this.style.background='var(--green)';
+        var badge = el.querySelector('[data-badge-pid="'+pid+'"]');
+        if(badge){ badge.textContent='✓ Enviadas'; badge.style.color='var(--green)'; }
+        setTimeout(()=>{ this.textContent='Actualizar y enviar'; this.style.background='linear-gradient(135deg,var(--red),var(--orange))'; this.disabled=false; },2000);
+      });
+    });
+  }
 }
 
 function renderMedHoy(){
@@ -1840,6 +2020,59 @@ function renderMedHoy(){
   return out;
 }
 
+
+function renderMedRecos(){
+  var out = '<div class="a1"><div class="page-title">Recos <em>Personalizadas</em></div>';
+  out += '<div class="page-sub">Envía recomendaciones a cada jugador</div></div>';
+
+  var sections = [
+    {key:'nutricion',  label:'🔥 Nutrición e Hidratación'},
+    {key:'suplementacion', label:'💊 Suplementación'},
+    {key:'recuperacion',   label:'😴 Recuperación'},
+    {key:'mental',         label:'🧠 Mental'},
+  ];
+
+  function renderPlayerRecos(player){
+    var existingRec = getRecos(player.id)||{};
+    var defRec = getDefaultRecos(player);
+    var isEnviado = existingRec.enviado||false;
+    var av = initials(player.name);
+
+    var c = '<div class="reco-player-card a2">';
+    // Header
+    c += '<div class="reco-player-header">';
+    c += '<div class="p-av" style="'+avColor(player.gender)+';width:38px;height:38px;font-size:13px;flex-shrink:0">'+av+'</div>';
+    c += '<div style="flex:1;min-width:0"><div style="font-size:14px;font-weight:700">'+player.name+'</div>';
+    c += '<div style="font-size:11px;color:var(--muted)">'+player.club+'</div></div>';
+    c += '<span data-badge-pid="'+player.id+'" style="font-size:10px;font-weight:700;'+(isEnviado?'color:var(--green)':'color:var(--muted)')+'">'+
+         (isEnviado?'✓ Enviadas':'Sin enviar')+'</span>';
+    c += '</div>';
+    // Fields
+    sections.forEach(function(s){
+      var val = existingRec[s.key] || defRec[s.key] || '';
+      c += '<div style="margin-bottom:8px">';
+      c += '<div style="font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:4px">'+s.label+'</div>';
+      c += '<textarea data-reco-pid="'+player.id+'" data-reco-key="'+s.key+'" ';
+      c += 'style="width:100%;background:var(--bg);border:1.5px solid var(--border);border-radius:9px;padding:9px 12px;font-family:DM Sans,sans-serif;font-size:12px;color:var(--text);outline:none;resize:vertical;min-height:60px;line-height:1.5">'+val+'</textarea>';
+      c += '</div>';
+    });
+    c += '<button data-save-reco="'+player.id+'" style="width:100%;padding:12px;background:linear-gradient(135deg,var(--red),var(--orange));border:none;border-radius:10px;font-family:DM Sans,sans-serif;font-size:13px;font-weight:700;color:#fff;cursor:pointer;margin-top:4px">'+
+         (isEnviado?'Actualizar y enviar':'Enviar recomendaciones')+'</button>';
+    c += '</div>';
+    return c;
+  }
+
+  out += '<div class="section-head a2">🇪🇸 Selección Femenina</div>';
+  out += '<div style="display:grid;gap:12px" class="a2">';
+  PLAYERS_FEM.forEach(function(p){ out += renderPlayerRecos(p); });
+  out += '</div>';
+  out += '<div class="section-head a3">🇪🇸 Selección Masculina</div>';
+  out += '<div style="display:grid;gap:12px" class="a3">';
+  PLAYERS_MAS.forEach(function(p){ out += renderPlayerRecos(p); });
+  out += '</div>';
+  out += '<div style="height:20px"></div>';
+  return out;
+}
 function renderMedEquipo(){
   function makeHistCard(p){
     var entries=cache.wellness[p.id]||[];
