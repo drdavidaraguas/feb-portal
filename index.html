@@ -2155,10 +2155,13 @@ function buildMedView(v){
         var fields = el.querySelectorAll('[data-reco-pid="'+pid+'"]');
         var recData = {};
         fields.forEach(function(f){ recData[f.getAttribute('data-reco-key')] = f.value.trim(); });
+        // Preserve existing antro data when saving recos
+        var existing = cache.recos && cache.recos[pid] ? cache.recos[pid] : {};
+        var merged = Object.assign({}, existing, recData, {enviado:true});
         this.textContent='Enviando...'; this.disabled=true;
-        await dbSaveRecos(pid, recData);
+        await dbSaveRecos(pid, merged);
         if(!cache.recos) cache.recos={};
-        cache.recos[pid] = Object.assign({},recData,{enviado:true});
+        cache.recos[pid] = merged;
         this.textContent='✓ Enviadas'; this.style.background='var(--green)';
         var badge = el.querySelector('[data-badge-pid="'+pid+'"]');
         if(badge){ badge.textContent='✓ Enviadas'; badge.style.color='var(--green)'; }
