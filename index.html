@@ -1274,7 +1274,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
       Recos
     </button>
     <button class="bn-btn" id="mn-antro" onclick="showMedView('antro')">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="2" x2="12" y2="22"/><path d="M17 5H9.5a3.5 3.5 0 00 0 7h5a3.5 3.5 0 010 7H6"/></svg>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a3 3 0 100 6 3 3 0 000-6z"/><path d="M7 22v-4a5 5 0 0110 0v4"/><line x1="3" y1="8" x2="21" y2="8"/><line x1="3" y1="12" x2="21" y2="12"/></svg>
       Antrop.
     </button>
   </nav>
@@ -1442,9 +1442,11 @@ async function dbSaveRecos(userId, recos){
     suplementacion: recos.suplementacion||'',
     recuperacion: recos.recuperacion||'',
     mental: recos.mental||'',
-    peso: recos.peso||null,
-    altura: recos.altura||null,
-    enviado: true,
+    peso: recos.peso!=null ? recos.peso : null,
+    altura: recos.altura!=null ? recos.altura : null,
+    masa: recos.masa!=null ? recos.masa : null,
+    grasa: recos.grasa!=null ? recos.grasa : null,
+    enviado: recos.enviado||false,
     updated_at: new Date().toISOString()
   }), 7000);
 }
@@ -1531,13 +1533,15 @@ function getDefaultRecos(player){
   var suplementacion = 'Básico:\n- Creatina monohidrato (Creapure): 5g/día\n- Proteína 30g/día si no se llega a las necesidades de 1,8-2,2g/kg'
     + (protMin ? ' ('+peso+'kg → '+protMin+'–'+protMax+'g/día)' : '')
     + '\nOpcional: Vitamina D, Magnesio, Omega 3 y otras (valorar con el médico)';
-  var recuperacion = 'Crioterapia miembro inferior 10-15 min tras sesiones dobles\nFoam roller 10 min diarios\nMovilidad articular antes y estiramientos estáticos después de entrenamientos y partidos\nSueño 8-9h. Sin pantallas 30 min antes. Habitación fresca. Hidratación activa entre sesiones.';
+  var recuperacion = 'Crioterapia miembro inferior 10-15 min tras sesiones dobles\nFoam roller 10 min diarios\nMovilidad articular antes y estiramientos estáticos después de entrenamientos y partidos\nSueño 8-9h. Sin pantallas 30 min antes. Habitación fresca.\nHidratación activa entre sesiones.';
   var mental = 'Activación pre-entreno: 2–3 min de respiración diafragmática\n'
     + 'Reencuadre del error: gesto de reset → verbalización neutra → siguiente acción (3 seg)\n'
     + 'Focalización en el proceso: una tarea concreta por posesión, no el resultado\n'
     + 'Regulación del arousal: contracción isométrica del puño 3s + liberación\n'
     + 'Cohesión de grupo';
-  return {nutricion, suplementacion, recuperacion, mental, peso, altura};
+  var masa  = player.masa  != null ? player.masa  : null;
+  var grasa = player.grasa != null ? player.grasa : null;
+  return {nutricion, suplementacion, recuperacion, mental, peso, altura, masa, grasa};
 }
 
 function togglePass(){
@@ -1933,6 +1937,36 @@ function showPlayerProfile(){
       '</div>';
   }
 
+  // Build antro display block
+  function buildAntroBlock(){
+    var antro = dbRec || {};
+    var peso   = antro.peso   != null ? antro.peso   : null;
+    var altura = antro.altura != null ? antro.altura : null;
+    var masa   = antro.masa   != null ? antro.masa   : null;
+    var grasa  = antro.grasa  != null ? antro.grasa  : null;
+    var hasData = peso !== null || altura !== null;
+    if(!hasData){
+      return '<div class="a2" style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px;text-align:center">'+
+        '<div style="font-size:26px;margin-bottom:8px">📐</div>'+
+        '<div style="font-size:13px;color:var(--muted2);line-height:1.6;max-width:280px;margin:0 auto">'+
+        'Tu médico añadirá tu antropometría durante la concentración.</div></div>';
+    }
+    var imc = (peso && altura) ? (peso / Math.pow(altura/100, 2)).toFixed(1) : null;
+    var imcLabel = imc ? (imc < 18.5 ? 'Bajo peso' : imc < 25 ? 'Normal' : imc < 30 ? 'Sobrepeso' : 'Obesidad') : '';
+    var items = [];
+    if(peso)   items.push({icon:'⚖️', label:'Peso',           val: peso+' kg'});
+    if(altura) items.push({icon:'📏', label:'Altura',         val: altura+' cm'});
+    if(imc)    items.push({icon:'📊', label:'IMC',            val: imc+' ('+imcLabel+')'});
+    if(masa)   items.push({icon:'💪', label:'Masa muscular',  val: masa+' kg'});
+    if(grasa)  items.push({icon:'🔬', label:'% Grasa',        val: grasa+'%'});
+    var rows = items.map(function(it){
+      return '<div style="display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid rgba(255,255,255,0.05)">'+
+        '<span style="font-size:12px;color:var(--muted2)">'+it.icon+' '+it.label+'</span>'+
+        '<span style="font-size:14px;font-weight:700;color:var(--text)">'+it.val+'</span></div>';
+    }).join('');
+    return '<div class="a2" style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px 16px">'+rows+'</div>';
+  }
+
   var rec = dbRec || {};
   var recosHTML = recosEnviadas
     ? '<div style="display:grid;gap:10px">'+
@@ -1961,11 +1995,7 @@ function showPlayerProfile(){
     '</div>'+
 
     '<div class="section-head a2">📐 Antropometría</div>'+
-    '<div class="a2" style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px;text-align:center">'+
-    '<div style="font-size:26px;margin-bottom:8px">📐</div>'+
-    '<div style="font-size:13px;color:var(--muted2);line-height:1.6;max-width:280px;margin:0 auto">'+
-    'Tu médico añadirá tu antropometría y tus recomendaciones personalizadas durante la concentración.</div>'+
-    '</div>'+
+    buildAntroBlock()+
 
     '<div class="section-head a3">💡 Recomendaciones</div>'+
     '<div class="a3" style="margin-bottom:20px">'+recosHTML+'</div>'+
@@ -2033,21 +2063,24 @@ function buildMedView(v){
     el.querySelectorAll('[data-save-antro]').forEach(function(btn){
       btn.addEventListener('click', async function(){
         var pid = this.getAttribute('data-save-antro');
-        var fields = el.querySelectorAll('[data-antro-pid="'+pid+'"]');
-        var antroData = {};
-        fields.forEach(function(f){ antroData[f.getAttribute('data-antro-key')] = f.value.trim(); });
-        var peso = parseFloat(antroData.peso)||null;
-        var altura = parseFloat(antroData.altura)||null;
-        if(!peso && !altura){ alert('Introduce al menos peso o altura'); return; }
+        var uid = this.getAttribute('data-antro-uid');
+        var pesoEl   = document.getElementById('antro-peso-'+uid);
+        var alturaEl = document.getElementById('antro-altura-'+uid);
+        var masaEl   = document.getElementById('antro-masa-'+uid);
+        var grasaEl  = document.getElementById('antro-grasa-'+uid);
+        var peso   = pesoEl   && pesoEl.value   !== '' ? parseFloat(pesoEl.value)   : null;
+        var altura = alturaEl && alturaEl.value !== '' ? parseFloat(alturaEl.value) : null;
+        var masa   = masaEl   && masaEl.value   !== '' ? parseFloat(masaEl.value)   : null;
+        var grasa  = grasaEl  && grasaEl.value  !== '' ? parseFloat(grasaEl.value)  : null;
+        if(peso === null && altura === null){ alert('Introduce al menos peso o altura'); return; }
         this.textContent='Guardando...'; this.disabled=true;
-        // Save via dbSaveRecos preserving existing reco fields
-        var existing = cache.recos&&cache.recos[pid] ? cache.recos[pid] : {};
-        var merged = Object.assign({}, existing, {peso:peso, altura:altura});
+        var existing = cache.recos && cache.recos[pid] ? cache.recos[pid] : {};
+        var merged = Object.assign({}, existing, {peso:peso, altura:altura, masa:masa, grasa:grasa});
         await dbSaveRecos(pid, merged);
         if(!cache.recos) cache.recos={};
         cache.recos[pid] = merged;
         this.textContent='✓ Guardado'; this.style.background='var(--green)';
-        var badge = el.querySelector('[data-antro-badge-pid="'+pid+'"]');
+        var badge = document.getElementById('antro-badge-'+uid);
         if(badge){ badge.textContent='✓ Con datos'; badge.style.color='var(--green)'; }
         setTimeout(()=>{ this.textContent='Actualizar datos'; this.style.background='linear-gradient(135deg,var(--red),var(--orange))'; this.disabled=false; },2000);
       });
@@ -2126,7 +2159,14 @@ function renderMedRecos(){
 
   function renderPlayerRecos(player){
     var existingRec = getRecos(player.id)||{};
-    var defRec = getDefaultRecos(player);
+    var antroData = cache.recos && cache.recos[player.id] ? cache.recos[player.id] : {};
+    var playerWithAntro = Object.assign({}, player, {
+      peso: antroData.peso!=null ? antroData.peso : null,
+      altura: antroData.altura!=null ? antroData.altura : null,
+      masa: antroData.masa!=null ? antroData.masa : null,
+      grasa: antroData.grasa!=null ? antroData.grasa : null
+    });
+    var defRec = getDefaultRecos(playerWithAntro);
     var isEnviado = existingRec.enviado||false;
     var av = initials(player.name);
 
@@ -2165,67 +2205,109 @@ function renderMedRecos(){
   out += '<div style="height:20px"></div>';
   return out;
 
+function calcAntroIMC(uid){
+  var pesoEl  = document.getElementById('antro-peso-'+uid);
+  var altEl   = document.getElementById('antro-altura-'+uid);
+  var imcEl   = document.getElementById('antro-imc-'+uid);
+  if(!imcEl) return;
+  var p = pesoEl  ? parseFloat(pesoEl.value)  : NaN;
+  var h = altEl   ? parseFloat(altEl.value)   : NaN;
+  if(!isNaN(p) && !isNaN(h) && h > 0){
+    var imc = (p / Math.pow(h/100, 2)).toFixed(1);
+    var label = imc < 18.5 ? 'Bajo peso' : imc < 25 ? 'Normal' : imc < 30 ? 'Sobrepeso' : 'Obesidad';
+    imcEl.innerHTML = '📊 IMC: <strong style="color:var(--fg)">'+imc+'</strong> — '+label;
+  } else {
+    imcEl.innerHTML = '';
+  }
+}
+
 function renderMedAntro(){
   var out = '<div class="a1"><div class="page-title">Antropometría <em>Jugadores</em></div>';
-  out += '<div class="page-sub">Introduce peso y altura para personalizar las recomendaciones</div></div>';
+  out += '<div class="page-sub">Introduce los datos corporales para personalizar las recomendaciones</div></div>';
 
   function renderAntroCard(player){
-    var rec = cache.recos&&cache.recos[player.id] ? cache.recos[player.id] : {};
-    var peso = rec.peso||'';
-    var altura = rec.altura||'';
+    var rec = cache.recos && cache.recos[player.id] ? cache.recos[player.id] : {};
+    var peso    = rec.peso    != null ? rec.peso    : '';
+    var altura  = rec.altura  != null ? rec.altura  : '';
+    var masa    = rec.masa    != null ? rec.masa    : '';
+    var grasa   = rec.grasa   != null ? rec.grasa   : '';
     var av = initials(player.name);
-    var isSaved = (peso||altura) ? true : false;
+    var isSaved = (peso !== '' || altura !== '') ? true : false;
+    var uid = player.id.replace('.','_');
 
     var c = '<div class="reco-player-card a2">';
+    // Header
     c += '<div class="reco-player-header">';
     c += '<div class="p-av" style="'+avColor(player.gender)+';width:38px;height:38px;font-size:13px;flex-shrink:0">'+av+'</div>';
     c += '<div style="flex:1;min-width:0"><div style="font-size:14px;font-weight:700">'+player.name+'</div>';
     c += '<div style="font-size:11px;color:var(--muted)">'+player.club+'</div></div>';
-    c += '<span data-antro-badge-pid="'+player.id+'" style="font-size:10px;font-weight:700;'+(isSaved?'color:var(--green)':'color:var(--muted)')+'">'+(isSaved?'✓ Con datos':'Sin datos')+'</span>';
+    c += '<span id="antro-badge-'+uid+'" style="font-size:10px;font-weight:700;'+(isSaved?'color:var(--green)':'color:var(--muted)')+'">'+
+         (isSaved ? '✓ Con datos' : 'Sin datos')+'</span>';
     c += '</div>';
 
-    // Peso field
-    c += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px">';
+    // 2x2 grid: peso, altura, masa muscular, % grasa
+    c += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px">';
+
+    // Peso
     c += '<div>';
     c += '<div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px">⚖️ Peso (kg)</div>';
-    c += '<input type="number" step="0.1" min="40" max="150" data-antro-pid="'+player.id+'" data-antro-key="peso" value="'+peso+'" placeholder="ej: 78.5" style="width:100%;padding:10px 12px;background:var(--glass);border:1px solid var(--border);border-radius:10px;font-family:DM Sans,sans-serif;font-size:14px;color:var(--fg);outline:none">';
+    c += '<input id="antro-peso-'+uid+'" type="number" step="0.1" min="40" max="150" value="'+peso+'" placeholder="ej: 78.5"'+
+         ' onchange="calcAntroIMC(\''+uid+'\')"'+
+         ' style="width:100%;padding:9px 10px;background:var(--glass);border:1px solid var(--border);border-radius:10px;font-family:DM Sans,sans-serif;font-size:14px;color:var(--fg);outline:none;box-sizing:border-box">';
     c += '</div>';
 
-    // Altura field
+    // Altura
     c += '<div>';
     c += '<div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px">📏 Altura (cm)</div>';
-    c += '<input type="number" step="1" min="140" max="230" data-antro-pid="'+player.id+'" data-antro-key="altura" value="'+altura+'" placeholder="ej: 180" style="width:100%;padding:10px 12px;background:var(--glass);border:1px solid var(--border);border-radius:10px;font-family:DM Sans,sans-serif;font-size:14px;color:var(--fg);outline:none">';
-    c += '</div>';
+    c += '<input id="antro-altura-'+uid+'" type="number" step="1" min="140" max="230" value="'+altura+'" placeholder="ej: 180"'+
+         ' onchange="calcAntroIMC(\''+uid+'\')"'+
+         ' style="width:100%;padding:9px 10px;background:var(--glass);border:1px solid var(--border);border-radius:10px;font-family:DM Sans,sans-serif;font-size:14px;color:var(--fg);outline:none;box-sizing:border-box">';
     c += '</div>';
 
-    // IMC preview if data available
-    if(peso && altura){
-      var imc = (parseFloat(peso) / Math.pow(parseFloat(altura)/100, 2)).toFixed(1);
-      var imcLabel = imc < 18.5 ? 'Bajo peso' : imc < 25 ? 'Normal' : imc < 30 ? 'Sobrepeso' : 'Obesidad';
-      c += '<div style="margin-top:8px;padding:8px 12px;background:rgba(255,255,255,0.05);border-radius:8px;font-size:12px;color:var(--muted)">';
-      c += '📊 IMC: <strong style="color:var(--fg)">'+imc+'</strong> — '+imcLabel;
-      c += '</div>';
+    // Masa muscular
+    c += '<div>';
+    c += '<div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px">💪 Masa muscular (kg)</div>';
+    c += '<input id="antro-masa-'+uid+'" type="number" step="0.1" min="20" max="120" value="'+masa+'" placeholder="ej: 42.0"'+
+         ' style="width:100%;padding:9px 10px;background:var(--glass);border:1px solid var(--border);border-radius:10px;font-family:DM Sans,sans-serif;font-size:14px;color:var(--fg);outline:none;box-sizing:border-box">';
+    c += '</div>';
+
+    // % Grasa
+    c += '<div>';
+    c += '<div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px">🔬 % Grasa corporal</div>';
+    c += '<input id="antro-grasa-'+uid+'" type="number" step="0.1" min="3" max="50" value="'+grasa+'" placeholder="ej: 14.5"'+
+         ' style="width:100%;padding:9px 10px;background:var(--glass);border:1px solid var(--border);border-radius:10px;font-family:DM Sans,sans-serif;font-size:14px;color:var(--fg);outline:none;box-sizing:border-box">';
+    c += '</div>';
+
+    c += '</div>'; // end grid
+
+    // IMC en tiempo real
+    var imcHtml = '';
+    if(peso !== '' && altura !== ''){
+      var imcVal = (parseFloat(peso) / Math.pow(parseFloat(altura)/100, 2)).toFixed(1);
+      var imcLabel = imcVal < 18.5 ? 'Bajo peso' : imcVal < 25 ? 'Normal' : imcVal < 30 ? 'Sobrepeso' : 'Obesidad';
+      imcHtml = '📊 IMC: <strong style="color:var(--fg)">'+imcVal+'</strong> — '+imcLabel;
     }
+    c += '<div id="antro-imc-'+uid+'" style="margin-top:8px;padding:8px 12px;background:rgba(255,255,255,0.05);border-radius:8px;font-size:12px;color:var(--muted);min-height:32px">'+imcHtml+'</div>';
 
-    // Save button
-    c += '<button data-save-antro="'+player.id+'" style="width:100%;padding:12px;background:linear-gradient(135deg,var(--red),var(--orange));border:none;border-radius:10px;font-family:DM Sans,sans-serif;font-size:13px;font-weight:700;color:#fff;cursor:pointer;margin-top:10px">';
-    c += (isSaved ? 'Actualizar datos' : 'Guardar datos') + '</button>';
+    // Guardar button - uses data-save-antro + data-uid for lookup
+    c += '<button data-save-antro="'+player.id+'" data-antro-uid="'+uid+'" style="width:100%;padding:12px;background:linear-gradient(135deg,var(--red),var(--orange));border:none;border-radius:10px;font-family:DM Sans,sans-serif;font-size:13px;font-weight:700;color:#fff;cursor:pointer;margin-top:10px">';
+    c += (isSaved ? 'Actualizar datos' : 'Guardar datos')+'</button>';
     c += '</div>';
     return c;
   }
 
   out += '<div class="section-head a2">🇪🇸 Selección Femenina</div>';
-  out += '<div style="display:grid;gap:12px" class="a2">';
+  out += '<div style="display:grid;gap:10px" class="a2">';
   PLAYERS_FEM.forEach(function(p){ out += renderAntroCard(p); });
   out += '</div>';
   out += '<div class="section-head a3">🇪🇸 Selección Masculina</div>';
-  out += '<div style="display:grid;gap:12px" class="a3">';
+  out += '<div style="display:grid;gap:10px" class="a3">';
   PLAYERS_MAS.forEach(function(p){ out += renderAntroCard(p); });
   out += '</div>';
   out += '<div style="height:20px"></div>';
   return out;
 }
-}
+
 function renderMedEquipo(){
   function makeHistCard(p){
     var entries=cache.wellness[p.id]||[];
