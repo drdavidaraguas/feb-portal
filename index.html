@@ -1511,21 +1511,34 @@ function getFisioNoteTime(playerId){
 // ═══════════════════════════════════════════
 
 function getDefaultRecos(player){
-  var peso = player.peso||null;
-  var altura = player.altura||null;
-  var edad = 21;
+  var peso   = player.peso   != null ? parseFloat(player.peso)   : null;
+  var altura = player.altura != null ? parseFloat(player.altura) : null;
+  var grasa  = player.grasa  != null ? parseFloat(player.grasa)  : null;
+  var edad   = player.dob ? calcAge(player.dob) : 21;
   var kcal = null, hidra = null, protMin = null, protMax = null;
-  if(peso && altura){
-    var tmb = player.gender==='fem'
-      ? (10*peso)+(6.25*altura)-(5*edad)-161
-      : (10*peso)+(6.25*altura)-(5*edad)+5;
-    kcal = Math.round(tmb*1.7);
-    hidra = Math.round(peso*37.5);
+  var masaMagra = (peso && grasa) ? +(peso * (1 - grasa/100)).toFixed(1) : null;
+
+  if(peso){
     protMin = Math.round(peso*1.8);
     protMax = Math.round(peso*2.2);
   }
+
+  if(masaMagra){
+    // Cunningham: TMB = 500 + (22 × masa magra) — validada para deportistas
+    kcal  = Math.round((500 + 22*masaMagra) * 1.7);
+    hidra = Math.round(masaMagra * 45); // 45 ml/kg masa magra
+  } else if(peso && altura){
+    // Fallback Mifflin-St Jeor si no hay % grasa
+    var tmb = player.gender==='fem'
+      ? (10*peso)+(6.25*altura)-(5*edad)-161
+      : (10*peso)+(6.25*altura)-(5*edad)+5;
+    kcal  = Math.round(tmb * 1.7);
+    hidra = Math.round(peso * 37.5); // fallback: 37.5 ml/kg peso total
+  }
+
   var nutricion = kcal
     ? kcal+' kcal/día · Hidratación: '+hidra+'ml/día + 500–750ml/h entrenamiento'
+      +(masaMagra ? ' (Cunningham, masa magra '+masaMagra+'kg)' : ' (Mifflin-St Jeor)')
     : 'Pendiente de antropometría · Hidratación: 35–40ml/kg/día + 500–750ml/h entrenamiento';
   var suplementacion = 'Básico:\n- Creatina monohidrato (Creapure): 5g/día\n- Proteína 30g/día si no se llega a las necesidades de 1,8-2,2g/kg'
     + (protMin ? ' ('+peso+'kg → '+protMin+'–'+protMax+'g/día)' : '')
@@ -1536,8 +1549,7 @@ function getDefaultRecos(player){
     + 'Focalización en el proceso: una tarea concreta por posesión, no el resultado\n'
     + 'Regulación del arousal: contracción isométrica del puño 3s + liberación\n'
     + 'Cohesión de grupo';
-  var grasa = player.grasa != null ? player.grasa : null;
-  return {nutricion, suplementacion, recuperacion, mental, peso, altura, grasa};
+  return {nutricion, suplementacion, recuperacion, mental, peso, altura, grasa, masaMagra};
 }
 
 function togglePass(){
@@ -2066,15 +2078,12 @@ function showPlayerProfile(){
   }
   var rec = dbRec || {};
   if(currentUser.peso && currentUser.altura){
+    // Always recalculate nutricion and suplementacion from latest antro data
     var freshDef = getDefaultRecos(currentUser);
-    var needsNutriRefresh  = rec.nutricion     && rec.nutricion.indexOf('Pendiente') >= 0;
-    var needsSupleRefresh  = rec.suplementacion && rec.suplementacion.indexOf('1,8-2,2g/kg/día') >= 0;
-    if(needsNutriRefresh || needsSupleRefresh){
-      rec = Object.assign({}, rec, {
-        nutricion:     needsNutriRefresh  ? freshDef.nutricion     : rec.nutricion,
-        suplementacion: needsSupleRefresh ? freshDef.suplementacion : rec.suplementacion
-      });
-    }
+    rec = Object.assign({}, rec, {
+      nutricion:      freshDef.nutricion,
+      suplementacion: freshDef.suplementacion
+    });
   }
   var recosHTML = recosEnviadas
     ? '<div style="display:grid;gap:10px">'+
@@ -2288,10 +2297,16 @@ function renderMedRecos(){
     // Fields
     sections.forEach(function(s){
       var rawVal = existingRec[s.key] || '';
-      // If stored value has placeholder text but antro data is now available, use calculated default
-      var val = (rawVal && rawVal.indexOf('Pendiente') < 0 && rawVal.indexOf('1,8-2,2g/kg/día') < 0)
-        ? rawVal
-        : (defRec[s.key] || rawVal || '');
+      var val;
+      // nutricion and suplementacion are calculated from antro data → always use latest calculation
+      // recuperacion and mental are doctor's custom text → preserve if exists
+      if(s.key === 'nutricion' || s.key === 'suplementacion'){
+        val = (playerWithAntro.peso && playerWithAntro.altura)
+          ? (defRec[s.key] || rawVal || '')   // antro available → use fresh calculation
+          : (rawVal || defRec[s.key] || '');  // no antro → use stored or generic default
+      } else {
+        val = rawVal || defRec[s.key] || '';  // recuperacion/mental: preserve doctor's text
+      }
       c += '<div style="margin-bottom:8px">';
       c += '<div style="font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:4px">'+s.label+'</div>';
       c += '<textarea data-reco-pid="'+player.id+'" data-reco-key="'+s.key+'" ';
