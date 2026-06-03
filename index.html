@@ -386,6 +386,73 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 .pb{padding-bottom:70px;}
 @media(min-width:640px){.pb{padding-bottom:0;}}
 
+/* ── MEDICAL DESKTOP TABS ── */
+.med-desktop-tabs{display:none;align-items:center;gap:4px;margin-left:16px;}
+@media(min-width:640px){.med-desktop-tabs{display:flex;}}
+.med-dt-btn{
+  padding:8px 16px;
+  background:transparent;
+  border:1px solid rgba(255,255,255,0.15);
+  border-radius:8px;
+  font-family:DM Sans,sans-serif;
+  font-size:13px;
+  font-weight:600;
+  color:var(--muted);
+  cursor:pointer;
+  transition:all .2s;
+  white-space:nowrap;
+}
+.med-dt-btn:hover{color:var(--orange);border-color:rgba(232,97,10,0.4);}
+.med-dt-btn.active{
+  color:var(--orange);
+  background:rgba(232,97,10,0.15);
+  border-color:rgba(232,97,10,0.5);
+}
+
+/* ── STAFF PORTAL IMPROVEMENTS ── */
+.staff-header{
+  padding:20px;
+  background:linear-gradient(135deg,rgba(232,97,10,0.12),rgba(200,16,46,0.08));
+  border-radius:14px;
+  margin-bottom:16px;
+  border:1px solid rgba(232,97,10,0.2);
+}
+.staff-role-badge{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  padding:4px 12px;
+  border-radius:20px;
+  font-size:11px;
+  font-weight:700;
+  text-transform:uppercase;
+  letter-spacing:.08em;
+  margin-bottom:8px;
+}
+.staff-role-badge.entrenador{background:rgba(59,130,246,0.15);color:#60a5fa;border:1px solid rgba(59,130,246,0.3);}
+.staff-role-badge.fisio{background:rgba(16,185,129,0.15);color:#34d399;border:1px solid rgba(16,185,129,0.3);}
+.staff-wellness-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px;}
+.staff-player-card{
+  background:var(--glass);
+  border:1px solid var(--border);
+  border-radius:14px;
+  padding:14px;
+  transition:border-color .2s;
+}
+.staff-player-card:hover{border-color:rgba(232,97,10,0.4);}
+.staff-stat-row{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.05);}
+.staff-stat-row:last-child{border-bottom:none;}
+.staff-kpi-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin:12px 0;}
+.staff-kpi-card{
+  padding:12px;
+  border-radius:10px;
+  text-align:center;
+  background:var(--glass);
+  border:1px solid var(--border);
+}
+.staff-kpi-num{font-size:24px;font-weight:800;line-height:1;}
+.staff-kpi-label{font-size:10px;color:var(--muted);font-weight:600;text-transform:uppercase;margin-top:4px;}
+
 /* ── SUCCESS ── */
 .success-wrap{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:60vh;text-align:center;padding:32px;}
 .success-icon{font-size:60px;margin-bottom:16px;animation:bounce .5s ease;}
@@ -1184,6 +1251,13 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
       <div class="nav-avatar" style="background:linear-gradient(135deg,#E8610A,#C8102E)">DA</div>
       <button class="btn-ghost" onclick="doLogout()">Salir</button>
     </div>
+    <!-- DESKTOP TABS para médico -->
+    <div class="med-desktop-tabs">
+      <button class="med-dt-btn active" id="mdt-hoy" onclick="showMedView('hoy')">📊 Hoy</button>
+      <button class="med-dt-btn" id="mdt-equipo" onclick="showMedView('equipo')">👥 Equipo</button>
+      <button class="med-dt-btn" id="mdt-recos" onclick="showMedView('recos')">📋 Recos</button>
+      <button class="med-dt-btn" id="mdt-antro" onclick="showMedView('antro')">📐 Antropometría</button>
+    </div>
   </nav>
   <div class="main-content pb" id="medical-content"></div>
   <nav class="bottom-nav">
@@ -1198,6 +1272,10 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
     <button class="bn-btn" id="mn-recos" onclick="showMedView('recos')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
       Recos
+    </button>
+    <button class="bn-btn" id="mn-antro" onclick="showMedView('antro')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="2" x2="12" y2="22"/><path d="M17 5H9.5a3.5 3.5 0 00 0 7h5a3.5 3.5 0 010 7H6"/></svg>
+      Antrop.
     </button>
   </nav>
 </div>
@@ -1450,19 +1528,15 @@ function getDefaultRecos(player){
   var nutricion = kcal
     ? kcal+' kcal/día · Hidratación: '+hidra+'ml/día + 500–750ml/h entrenamiento'
     : 'Pendiente de antropometría · Hidratación: 35–40ml/kg/día + 500–750ml/h entrenamiento';
-  var suplementacion = 'Creatina monohidrato: 5g/día · Proteína: '
-    + (protMin ? protMin+'–'+protMax+'g/día ('+peso+'kg × 1.8–2.2)' : '1.8–2.2g/kg/día')
-    + '\nValorar con el médico: Vitamina D · Omega-3 · Magnesio · otras';
-  var recuperacion = 'Crioterapia miembro inferior 10–15 min tras sesiones dobles\n'
-    + 'Foam rolling 10 min diarios\n'
-    + 'Movilidad articular antes · Estiramientos estáticos después\n'
-    + 'Sueño 8–9h · Sin pantallas 30 min antes · Habitación fresca\n'
-    + 'Hidratación activa entre sesiones';
+  var suplementacion = 'Básico:\n- Creatina monohidrato (Creapure): 5g/día\n- Proteína 30g/día si no se llega a las necesidades de 1,8-2,2g/kg'
+    + (protMin ? ' ('+peso+'kg → '+protMin+'–'+protMax+'g/día)' : '')
+    + '\nOpcional: Vitamina D, Magnesio, Omega 3 y otras (valorar con el médico)';
+  var recuperacion = 'Crioterapia miembro inferior 10-15 min tras sesiones dobles\nFoam roller 10 min diarios\nMovilidad articular antes y estiramientos estáticos después de entrenamientos y partidos\nSueño 8-9h. Sin pantallas 30 min antes. Habitación fresca. Hidratación activa entre sesiones.';
   var mental = 'Activación pre-entreno: 2–3 min de respiración diafragmática\n'
     + 'Reencuadre del error: gesto de reset → verbalización neutra → siguiente acción (3 seg)\n'
     + 'Focalización en el proceso: una tarea concreta por posesión, no el resultado\n'
     + 'Regulación del arousal: contracción isométrica del puño 3s + liberación\n'
-    + 'Cohesión de grupo: ritual de equipo 2 min antes de cada sesión';
+    + 'Cohesión de grupo';
   return {nutricion, suplementacion, recuperacion, mental, peso, altura};
 }
 
@@ -1629,7 +1703,7 @@ function renderWellnessForm(){
 
   const cards = [
     {key:'sueno',   icon:'😴', bg:'rgba(168,85,247,.15)', title:'Calidad del Sueño',   sub:'¿Cómo has dormido esta noche?',    emojis:['😣','😟','😐','🙂','😊'], labels:['Muy mal','Mal','Regular','Bien','Muy bien']},
-    {key:'energia', icon:'⚡', bg:'rgba(245,166,35,.15)', title:'Nivel de Energía',     sub:'¿Cómo te sientes físicamente hoy?', emojis:['🪫','😓','😐','💪','🔥'], labels:['Sin energía','Bajo','Normal','Bien','Excelente']},
+    {key:'energia', icon:'⚡', bg:'rgba(245,166,35,.15)', title:'Nivel de Energía',     sub:'¿Cómo te sientes físicamente hoy?', emojis:['🪫','😓','😐','💪','🍎'], labels:['Sin energía','Bajo','Normal','Bien','Excelente']},
     {key:'dolor',   icon:'🩹', bg:'rgba(200,16,46,.15)',  title:'Dolor / Molestias',    sub:'¿Tienes alguna molestia física?',   emojis:['😄','🙂','😐','😟','😣'], labels:['Sin dolor','Leve','Moderado','Intenso','Muy intenso']},
     {key:'animo',   icon:'🧠', bg:'rgba(34,197,94,.15)',  title:'Estado de Ánimo',      sub:'¿Cómo estás mentalmente hoy?',      emojis:['😞','😟','😐','🙂','😁'], labels:['Muy bajo','Bajo','Normal','Bien','Excelente']},
   ];
@@ -1838,16 +1912,7 @@ function showPlayerProfile(){
   }
 
   // ── SEMAFORO (single dot) ──
-  var semColorMap3 = {verde:'34,197,94', amarillo:'234,179,8', rojo:'248,113,113'};
-  var semBlock2 = '';
-  if(sem){
-    var sc = semColorMap3[sem];
-    semBlock2 = '<div style="display:flex;align-items:center;justify-content:center;flex-shrink:0;padding:4px">';
-    semBlock2 += '<div style="width:18px;height:18px;border-radius:50%;background:rgba('+sc+',1);';
-    semBlock2 += 'box-shadow:0 0 14px 4px rgba('+sc+',.5),0 0 4px rgba('+sc+',.9);';
-    semBlock2 += 'border:2px solid rgba('+sc+',.8)"></div>';
-    semBlock2 += '</div>';
-  }
+  var semBlock2 = ''; // semáforo eliminado
 
   // ── RECOS (from DB or placeholder) ──
   var dbRec = getRecos(currentUser.id);
@@ -1871,7 +1936,7 @@ function showPlayerProfile(){
   var rec = dbRec || {};
   var recosHTML = recosEnviadas
     ? '<div style="display:grid;gap:10px">'+
-      recoCard('🔥','Nutrición e Hidratación', rec.nutricion, '232,97,10')+
+      recoCard('🍎','Nutrición e Hidratación', rec.nutricion, '232,97,10')+
       recoCard('💊','Suplementación', rec.suplementacion, '34,197,94')+
       recoCard('😴','Recuperación', rec.recuperacion, '59,130,246')+
       recoCard('🧠','Mental', rec.mental, '168,85,247')+
@@ -1893,7 +1958,6 @@ function showPlayerProfile(){
     '<div class="meta-chip">🏀 '+currentUser.club+'</div>'+
     '<div class="meta-chip" style="'+genderBadge+'">'+(currentUser.gender==='fem'?'FEM':'MAS')+'</div>'+
     '</div></div>'+
-    semBlock2+
     '</div>'+
 
     '<div class="section-head a2">📐 Antropometría</div>'+
@@ -1917,7 +1981,8 @@ function showPlayerProfile(){
 // ═══════════════════════════════════════════
 async function showMedView(v){
   medView=v;
-  ['hoy','equipo','recos'].forEach(n=>{var e=document.getElementById('mn-'+n);if(e)e.classList.toggle('active',n===v);});
+  ['hoy','equipo','recos','antro'].forEach(n=>{var e=document.getElementById('mn-'+n);if(e)e.classList.toggle('active',n===v);});
+  ['hoy','equipo','recos','antro'].forEach(n=>{var e=document.getElementById('mdt-'+n);if(e)e.classList.toggle('active',n===v);});
   showLoading('Cargando datos...');
   try{
     await Promise.race([
@@ -1939,6 +2004,7 @@ function buildMedView(v){
   if(v==='hoy')    el.innerHTML=renderMedHoy();
   if(v==='equipo') el.innerHTML=renderMedEquipo();
   if(v==='recos')  el.innerHTML=renderMedRecos();
+  if(v==='antro')  el.innerHTML=renderMedAntro();
   el.onclick=function(e){
     var card=e.target.closest('[data-pid]');
     if(card) openModal(card.getAttribute('data-pid'));
@@ -1959,6 +2025,31 @@ function buildMedView(v){
         var badge = el.querySelector('[data-badge-pid="'+pid+'"]');
         if(badge){ badge.textContent='✓ Enviadas'; badge.style.color='var(--green)'; }
         setTimeout(()=>{ this.textContent='Actualizar y enviar'; this.style.background='linear-gradient(135deg,var(--red),var(--orange))'; this.disabled=false; },2000);
+      });
+    });
+  }
+  // Attach antro save buttons
+  if(v==='antro'){
+    el.querySelectorAll('[data-save-antro]').forEach(function(btn){
+      btn.addEventListener('click', async function(){
+        var pid = this.getAttribute('data-save-antro');
+        var fields = el.querySelectorAll('[data-antro-pid="'+pid+'"]');
+        var antroData = {};
+        fields.forEach(function(f){ antroData[f.getAttribute('data-antro-key')] = f.value.trim(); });
+        var peso = parseFloat(antroData.peso)||null;
+        var altura = parseFloat(antroData.altura)||null;
+        if(!peso && !altura){ alert('Introduce al menos peso o altura'); return; }
+        this.textContent='Guardando...'; this.disabled=true;
+        // Save via dbSaveRecos preserving existing reco fields
+        var existing = cache.recos&&cache.recos[pid] ? cache.recos[pid] : {};
+        var merged = Object.assign({}, existing, {peso:peso, altura:altura});
+        await dbSaveRecos(pid, merged);
+        if(!cache.recos) cache.recos={};
+        cache.recos[pid] = merged;
+        this.textContent='✓ Guardado'; this.style.background='var(--green)';
+        var badge = el.querySelector('[data-antro-badge-pid="'+pid+'"]');
+        if(badge){ badge.textContent='✓ Con datos'; badge.style.color='var(--green)'; }
+        setTimeout(()=>{ this.textContent='Actualizar datos'; this.style.background='linear-gradient(135deg,var(--red),var(--orange))'; this.disabled=false; },2000);
       });
     });
   }
@@ -2027,7 +2118,7 @@ function renderMedRecos(){
   out += '<div class="page-sub">Envía recomendaciones a cada jugador</div></div>';
 
   var sections = [
-    {key:'nutricion',  label:'🔥 Nutrición e Hidratación'},
+    {key:'nutricion',  label:'🍎 Nutrición e Hidratación'},
     {key:'suplementacion', label:'💊 Suplementación'},
     {key:'recuperacion',   label:'😴 Recuperación'},
     {key:'mental',         label:'🧠 Mental'},
@@ -2073,6 +2164,67 @@ function renderMedRecos(){
   out += '</div>';
   out += '<div style="height:20px"></div>';
   return out;
+
+function renderMedAntro(){
+  var out = '<div class="a1"><div class="page-title">Antropometría <em>Jugadores</em></div>';
+  out += '<div class="page-sub">Introduce peso y altura para personalizar las recomendaciones</div></div>';
+
+  function renderAntroCard(player){
+    var rec = cache.recos&&cache.recos[player.id] ? cache.recos[player.id] : {};
+    var peso = rec.peso||'';
+    var altura = rec.altura||'';
+    var av = initials(player.name);
+    var isSaved = (peso||altura) ? true : false;
+
+    var c = '<div class="reco-player-card a2">';
+    c += '<div class="reco-player-header">';
+    c += '<div class="p-av" style="'+avColor(player.gender)+';width:38px;height:38px;font-size:13px;flex-shrink:0">'+av+'</div>';
+    c += '<div style="flex:1;min-width:0"><div style="font-size:14px;font-weight:700">'+player.name+'</div>';
+    c += '<div style="font-size:11px;color:var(--muted)">'+player.club+'</div></div>';
+    c += '<span data-antro-badge-pid="'+player.id+'" style="font-size:10px;font-weight:700;'+(isSaved?'color:var(--green)':'color:var(--muted)')+'">'+(isSaved?'✓ Con datos':'Sin datos')+'</span>';
+    c += '</div>';
+
+    // Peso field
+    c += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px">';
+    c += '<div>';
+    c += '<div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px">⚖️ Peso (kg)</div>';
+    c += '<input type="number" step="0.1" min="40" max="150" data-antro-pid="'+player.id+'" data-antro-key="peso" value="'+peso+'" placeholder="ej: 78.5" style="width:100%;padding:10px 12px;background:var(--glass);border:1px solid var(--border);border-radius:10px;font-family:DM Sans,sans-serif;font-size:14px;color:var(--fg);outline:none">';
+    c += '</div>';
+
+    // Altura field
+    c += '<div>';
+    c += '<div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px">📏 Altura (cm)</div>';
+    c += '<input type="number" step="1" min="140" max="230" data-antro-pid="'+player.id+'" data-antro-key="altura" value="'+altura+'" placeholder="ej: 180" style="width:100%;padding:10px 12px;background:var(--glass);border:1px solid var(--border);border-radius:10px;font-family:DM Sans,sans-serif;font-size:14px;color:var(--fg);outline:none">';
+    c += '</div>';
+    c += '</div>';
+
+    // IMC preview if data available
+    if(peso && altura){
+      var imc = (parseFloat(peso) / Math.pow(parseFloat(altura)/100, 2)).toFixed(1);
+      var imcLabel = imc < 18.5 ? 'Bajo peso' : imc < 25 ? 'Normal' : imc < 30 ? 'Sobrepeso' : 'Obesidad';
+      c += '<div style="margin-top:8px;padding:8px 12px;background:rgba(255,255,255,0.05);border-radius:8px;font-size:12px;color:var(--muted)">';
+      c += '📊 IMC: <strong style="color:var(--fg)">'+imc+'</strong> — '+imcLabel;
+      c += '</div>';
+    }
+
+    // Save button
+    c += '<button data-save-antro="'+player.id+'" style="width:100%;padding:12px;background:linear-gradient(135deg,var(--red),var(--orange));border:none;border-radius:10px;font-family:DM Sans,sans-serif;font-size:13px;font-weight:700;color:#fff;cursor:pointer;margin-top:10px">';
+    c += (isSaved ? 'Actualizar datos' : 'Guardar datos') + '</button>';
+    c += '</div>';
+    return c;
+  }
+
+  out += '<div class="section-head a2">🇪🇸 Selección Femenina</div>';
+  out += '<div style="display:grid;gap:12px" class="a2">';
+  PLAYERS_FEM.forEach(function(p){ out += renderAntroCard(p); });
+  out += '</div>';
+  out += '<div class="section-head a3">🇪🇸 Selección Masculina</div>';
+  out += '<div style="display:grid;gap:12px" class="a3">';
+  PLAYERS_MAS.forEach(function(p){ out += renderAntroCard(p); });
+  out += '</div>';
+  out += '<div style="height:20px"></div>';
+  return out;
+}
 }
 function renderMedEquipo(){
   function makeHistCard(p){
@@ -2292,18 +2444,26 @@ async function buildStaffView(){
     return (cache.wellness[p.id]||[]).find(function(e){return e.fecha===todayStr();});
   }).length;
 
-  var html='<div class="a1"><div class="page-title">Estado del <em>Equipo</em></div>';
-  html+='<div class="page-sub">'+currentUser.cargo+' · '+todayStr()+'</div></div>';
+  var roleIcon = isFisio ? '🤲' : '🏀';
+  var roleBadgeClass = isFisio ? 'fisio' : 'entrenador';
+  var roleLabel = isFisio ? 'Fisioterapeuta' : 'Entrenador/a';
+  var teamLabel = team==='fem' ? '🇪🇸 Selección Femenina 3x3 U21' : team==='mas' ? '🇪🇸 Selección Masculina 3x3 U21' : '🇪🇸 Selección 3x3 U21';
+  var html='<div class="a1">';
+  html+='<div class="staff-header">';
+  html+='<div class="staff-role-badge '+roleBadgeClass+'">'+roleIcon+' '+roleLabel+'</div>';
+  html+='<div class="page-title" style="margin:4px 0 2px">Estado del <em>Equipo</em></div>';
+  html+='<div class="page-sub">'+teamLabel+' · '+todayStr()+'</div>';
+  html+='</div></div>';
   html+='<div class="kpi-row a2">';
-  html+='<div class="kpi kr"><div class="kpi-lbl">Alerta</div><div class="kpi-val">'+rojos.length+'</div><div class="kpi-sub">Inmediata</div></div>';
-  html+='<div class="kpi ky"><div class="kpi-lbl">Revisar</div><div class="kpi-val">'+amarillos.length+'</div><div class="kpi-sub">Seguimiento</div></div>';
-  html+='<div class="kpi kg"><div class="kpi-lbl">Aptos</div><div class="kpi-val">'+verdes.length+'</div><div class="kpi-sub">Sin alertas</div></div>';
-  html+='<div class="kpi kb"><div class="kpi-lbl">Wellness</div><div class="kpi-val">'+totalChecked+'/'+myPlayers.length+'</div><div class="kpi-sub">Recibidos</div></div>';
+  html+='<div class="kpi kr"><div class="kpi-lbl">🔴 Alerta</div><div class="kpi-val">'+rojos.length+'</div><div class="kpi-sub">Inmediata</div></div>';
+  html+='<div class="kpi ky"><div class="kpi-lbl">🟡 Revisar</div><div class="kpi-val">'+amarillos.length+'</div><div class="kpi-sub">Seguimiento</div></div>';
+  html+='<div class="kpi kg"><div class="kpi-lbl">🟢 Aptos</div><div class="kpi-val">'+verdes.length+'</div><div class="kpi-sub">Sin alertas</div></div>';
+  html+='<div class="kpi kb"><div class="kpi-lbl">📊 Wellness</div><div class="kpi-val">'+totalChecked+'/'+myPlayers.length+'</div><div class="kpi-sub">Recibidos</div></div>';
   html+='</div>';
-  if(rojos.length)    html+='<div class="section-head a2" style="color:#f87171">🔴 Atención inmediata</div>'+rojos.map(p=>staffCard(p,'a2')).join('');
-  if(amarillos.length)html+='<div class="section-head a3" style="color:var(--yellow);font-size:10px">● Revisar hoy</div>'+amarillos.map(p=>staffCard(p,'a3')).join('');
-  if(verdes.length)   html+='<div class="section-head a3" style="color:var(--green);font-size:10px">● Aptos</div>'+verdes.map(p=>staffCard(p,'a3')).join('');
-  if(sinDatos.length) html+='<div class="section-head a3" style="color:var(--muted)">● Sin Wellness</div>'+sinDatos.map(p=>staffCard(p,'a3')).join('');
+  if(rojos.length)    html+='<div class="section-head a2" style="color:#f87171;font-size:12px;font-weight:800">🔴 Atención inmediata ('+rojos.length+')</div><div style="display:grid;gap:10px" class="a2">'+rojos.map(p=>staffCard(p,'')).join('')+'</div>';
+  if(amarillos.length)html+='<div class="section-head a3" style="color:var(--yellow);font-size:12px;font-weight:800">🟡 Revisar hoy ('+amarillos.length+')</div><div style="display:grid;gap:10px" class="a3">'+amarillos.map(p=>staffCard(p,'')).join('')+'</div>';
+  if(verdes.length)   html+='<div class="section-head a3" style="color:var(--green);font-size:12px;font-weight:800">🟢 Aptos ('+verdes.length+')</div><div style="display:grid;gap:10px" class="a3">'+verdes.map(p=>staffCard(p,'')).join('')+'</div>';
+  if(sinDatos.length) html+='<div class="section-head a3" style="color:var(--muted);font-size:12px;font-weight:800">⚪ Sin datos wellness ('+sinDatos.length+')</div><div style="display:grid;gap:10px" class="a3">'+sinDatos.map(p=>staffCard(p,'')).join('')+'</div>';
   html+='<div style="height:8px"></div>';
   el.innerHTML=html;
 
