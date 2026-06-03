@@ -2013,7 +2013,7 @@ function showPlayerProfile(){
       var pGrasa = grasa.toFixed(1);
       var pMagra = (100 - grasa).toFixed(1);
       out += '<div class="a2" style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px;margin-bottom:10px">';
-      out += '<div style="font-size:9px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px">📊 Composición corporal estimada</div>';
+      out += '<div style="font-size:9px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px">📊 Composición corporal</div>';
       out += '<div style="height:18px;border-radius:99px;overflow:hidden;display:flex;gap:2px;margin-bottom:8px">';
       out += '<div style="flex:'+pMagra+';background:linear-gradient(135deg,'+avCol+','+avCol+'cc);border-radius:99px;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:rgba(255,255,255,.9)">'+pMagra+'%</div>';
       out += '<div style="flex:'+pGrasa+';background:linear-gradient(135deg,#E8610A,#c2410c);border-radius:99px;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:rgba(255,255,255,.9)">'+pGrasa+'%</div>';
@@ -2057,7 +2057,7 @@ function showPlayerProfile(){
     out += refRow('% Grasa corporal',
       grasa ? grasa+'% <span style="color:var(--muted);font-weight:400">('+grasaMin+'–'+grasaMax+'%)</span>' : '—',
       grasa ? grasaColor : 'var(--muted)', false);
-    out += refRow('Masa magra', masaMagra ? masaMagra+' kg' : '—', masaMagra?'var(--green)':'var(--muted)', false);
+    out += refRow('Masa magra', masaMagra ? masaMagra+' kg' : '—', masaMagra?avCol:'var(--muted)', false);
     out += refRow('Masa grasa', masaGrasa ? masaGrasa+' kg' : '—', masaGrasa?'var(--orange)':'var(--muted)', false);
     out += refRow('IMC', imc ? imc+' <span style="font-size:9px">(poco relevante)</span>' : '—', 'var(--muted)', true);
     out += '</div>';
