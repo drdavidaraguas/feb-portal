@@ -1971,7 +1971,8 @@ function showPlayerProfile(){
       var sexo = isFem ? 0 : 1;
       var edad = currentUser.dob ? calcAge(currentUser.dob) : 20;
       var etniaCorr = etnia==='asiatico' ? -2.0 : etnia==='afroamericano' ? 1.1 : 0;
-      masaMuscular = +(altura * (0.00744*brazo*brazo + 0.00088*muslo*muslo + 0.00441*pantorr*pantorr)
+      var altM = altura / 100; // Lee et al.: altura en METROS
+      masaMuscular = +(altM * (0.00744*brazo*brazo + 0.00088*muslo*muslo + 0.00441*pantorr*pantorr)
                       + 2.4*sexo - 0.048*edad + etniaCorr + 7.8).toFixed(1);
       masaMuscular = Math.max(0, masaMuscular);
     }
@@ -2110,7 +2111,26 @@ function showPlayerProfile(){
 
     return out;
   }
+  // Enrich currentUser with antro data from dbRec so getDefaultRecos can calculate kcal
+  if(dbRec){
+    if(dbRec.peso   != null) currentUser.peso    = dbRec.peso;
+    if(dbRec.altura != null) currentUser.altura  = dbRec.altura;
+    if(dbRec.grasa  != null) currentUser.grasa   = dbRec.grasa;
+  }
+  // If doctor sent recos but nutricion/suplementacion have no antro data yet
+  // (because antro was added after sending recos) → recalculate from current antro
   var rec = dbRec || {};
+  if(currentUser.peso && currentUser.altura){
+    var freshDef = getDefaultRecos(currentUser);
+    var needsNutriRefresh  = rec.nutricion     && rec.nutricion.indexOf('Pendiente') >= 0;
+    var needsSupleRefresh  = rec.suplementacion && rec.suplementacion.indexOf('1,8-2,2g/kg/día') >= 0;
+    if(needsNutriRefresh || needsSupleRefresh){
+      rec = Object.assign({}, rec, {
+        nutricion:     needsNutriRefresh  ? freshDef.nutricion     : rec.nutricion,
+        suplementacion: needsSupleRefresh ? freshDef.suplementacion : rec.suplementacion
+      });
+    }
+  }
   var recosHTML = recosEnviadas
     ? '<div style="display:grid;gap:10px">'+
       recoCard('🍎','Nutrición e Hidratación', rec.nutricion, '232,97,10')+
@@ -2400,7 +2420,8 @@ function calcAntroIMC(uid){
     var plr = allPlayers.find(function(x){ return x.id===pid; });
     var sexo = plr && plr.gender==='mas' ? 1 : 0;
     var edad = plr && plr.dob ? calcAge(plr.dob) : 20;
-    var sm = h * (0.00744*br*br + 0.00088*mu*mu + 0.00441*pa*pa) + 2.4*sexo - 0.048*edad + etniaCorr + 7.8;
+    var hm = h / 100; // Lee et al. uses height in METERS
+    var sm = hm * (0.00744*br*br + 0.00088*mu*mu + 0.00441*pa*pa) + 2.4*sexo - 0.048*edad + etniaCorr + 7.8;
     sm = Math.max(0, +sm.toFixed(1));
     parts.push('Masa muscular (Lee): <strong style="color:#60a5fa">'+sm+' kg</strong>');
   }
