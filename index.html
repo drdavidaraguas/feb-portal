@@ -1,4 +1,12 @@
-<
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Portal del Deportista – FEB 3×3 U21</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 
@@ -1436,7 +1444,10 @@ async function dbSaveRecos(userId, recos){
     peso:    recos.peso    != null ? recos.peso    : null,
     altura:  recos.altura  != null ? recos.altura  : null,
     grasa:   recos.grasa   != null ? recos.grasa   : null,
-
+    brazo:   recos.brazo   != null ? recos.brazo   : null,
+    muslo:   recos.muslo   != null ? recos.muslo   : null,
+    pantorr: recos.pantorr != null ? recos.pantorr : null,
+    etnia:   recos.etnia   || 'caucasico',
     enviado: recos.enviado||false,
     updated_at: new Date().toISOString()
   }), 7000);
@@ -1927,14 +1938,18 @@ function showPlayerProfile(){
       '</div>';
   }
 
-  // Build antro display block
+  // Build antro display block — Opción B con Lee et al.
   function buildAntroBlock(){
-    var antro  = dbRec || {};
-    var peso   = antro.peso   != null ? parseFloat(antro.peso)   : null;
-    var altura = antro.altura != null ? parseFloat(antro.altura) : null;
-    var grasa  = antro.grasa  != null ? parseFloat(antro.grasa)  : null;
+    var antro   = dbRec || {};
+    var peso    = antro.peso    != null ? parseFloat(antro.peso)    : null;
+    var altura  = antro.altura  != null ? parseFloat(antro.altura)  : null;
+    var grasa   = antro.grasa   != null ? parseFloat(antro.grasa)   : null;
+    var brazo   = antro.brazo   != null ? parseFloat(antro.brazo)   : null;
+    var muslo   = antro.muslo   != null ? parseFloat(antro.muslo)   : null;
+    var pantorr = antro.pantorr != null ? parseFloat(antro.pantorr) : null;
+    var etnia   = antro.etnia   || 'caucasico';
     var hasData = peso !== null || grasa !== null;
-    var isFem = currentUser.gender === 'fem';
+    var isFem   = currentUser.gender === 'fem';
 
     if(!hasData){
       return '<div class="a2" style="background:var(--card);border:1px solid var(--border);border-radius:16px;padding:28px 20px;text-align:center">'+
@@ -1947,25 +1962,37 @@ function showPlayerProfile(){
 
     // Calculated values
     var masaGrasa = (peso && grasa) ? +(peso * grasa / 100).toFixed(1) : null;
-    var masaMagra = (peso && masaGrasa !== null) ? +(peso - masaGrasa).toFixed(1) : null;
+    var masaLibre = (peso && masaGrasa !== null) ? +(peso - masaGrasa).toFixed(1) : null;
     var imc       = (peso && altura) ? +(peso / Math.pow(altura/100, 2)).toFixed(1) : null;
 
-    // % grasa reference ranges by gender
+    // Lee et al. muscle mass
+    var masaMuscular = null;
+    if(altura && brazo && muslo && pantorr){
+      var sexo = isFem ? 0 : 1;
+      var edad = currentUser.dob ? calcAge(currentUser.dob) : 20;
+      var etniaCorr = etnia==='asiatico' ? -2.0 : etnia==='afroamericano' ? 1.1 : 0;
+      var altM = altura / 100; // Lee et al.: altura en METROS
+      masaMuscular = +(altM * (0.00744*brazo*brazo + 0.00088*muslo*muslo + 0.00441*pantorr*pantorr)
+                      + 2.4*sexo - 0.048*edad + etniaCorr + 7.8).toFixed(1);
+      masaMuscular = Math.max(0, masaMuscular);
+    }
+
+    // % grasa reference ranges
     var grasaMin = isFem ? 14 : 8;
     var grasaMax = isFem ? 21 : 13;
     var grasaStatus = grasa ? (grasa < grasaMin ? 'bajo' : grasa <= grasaMax ? 'optimo' : 'alto') : null;
-    var grasaColor  = grasaStatus==='optimo'?'var(--green)':grasaStatus==='bajo'?'#60a5fa':'var(--yellow)';
-    var grasaLabel  = grasaStatus==='optimo'?'Óptimo':grasaStatus==='bajo'?'Bajo':'Por encima';
-    var grasaTagBg  = grasaStatus==='optimo'?'rgba(34,197,94,.15)':grasaStatus==='bajo'?'rgba(96,165,250,.15)':'rgba(234,179,8,.15)';
-    var grasaTagBdr = grasaStatus==='optimo'?'rgba(34,197,94,.3)':grasaStatus==='bajo'?'rgba(96,165,250,.3)':'rgba(234,179,8,.3)';
-    var grasaOkText = grasaStatus==='optimo'?'✓ En rango':grasaStatus==='bajo'?'↓ Por debajo':'⚠ Fuera de rango';
+    var grasaColor   = grasaStatus==='optimo'?'var(--green)':grasaStatus==='bajo'?'#60a5fa':'var(--yellow)';
+    var grasaLabel   = grasaStatus==='optimo'?'Óptimo':grasaStatus==='bajo'?'Bajo':'Por encima';
+    var grasaTagBg   = grasaStatus==='optimo'?'rgba(34,197,94,.15)':grasaStatus==='bajo'?'rgba(96,165,250,.15)':'rgba(234,179,8,.15)';
+    var grasaTagBdr  = grasaStatus==='optimo'?'rgba(34,197,94,.3)':grasaStatus==='bajo'?'rgba(96,165,250,.3)':'rgba(234,179,8,.3)';
+    var grasaOkText  = grasaStatus==='optimo'?'✓ En rango':grasaStatus==='bajo'?'↓ Por debajo':'⚠ Fuera de rango';
 
-    // Gauge arcs (circumference r=29 ≈ 182.2)
+    // Gauge arcs (circ r=29 = 182.2)
     var C = 182.2;
-    function arc(v,mn,mx){ return Math.max(0,Math.min(C,C*(v-mn)/(mx-mn))).toFixed(1); }
-    var arcPeso   = peso   ? arc(peso,   40,  130) : 0;
+    function arc(val,min,max){ return Math.max(0,Math.min(C,C*(val-min)/(max-min))).toFixed(1); }
+    var arcPeso   = peso   ? arc(peso, 40, 130)   : 0;
     var arcAltura = altura ? arc(altura, 150, 215) : 0;
-    var arcGrasa  = grasa  ? arc(grasa,  0,   grasaMax*1.8) : 0;
+    var arcGrasa  = grasa  ? arc(grasa, 0, grasaMax*1.8) : 0;
     var avCol = isFem ? '#ec4899' : '#3b82f6';
 
     var trackMax = grasaMax * 2.5;
@@ -1997,25 +2024,46 @@ function showPlayerProfile(){
       g += '</div>';
       return g;
     }
-    out += gauge('⚖️ Peso',    peso,   'kg', '#3b82f6',  arcPeso);
-    out += gauge('📏 Altura',  altura, 'cm', '#a855f7',  arcAltura);
-    out += gauge('🔬 % Grasa', grasa,  '%',  grasaColor, arcGrasa);
+    out += gauge('⚖️ Peso',   peso,   'kg',  '#3b82f6', arcPeso);
+    out += gauge('📏 Altura', altura, 'cm',  '#a855f7', arcAltura);
+    out += gauge('🔬 % Grasa', grasa ? grasa : null, '%', grasaColor, arcGrasa);
     out += '</div>';
 
-    // ── COMPOSICIÓN BAR: masa magra + masa grasa ──
-    if(masaGrasa !== null && masaMagra !== null){
+    // ── COMPOSICIÓN BAR: masa libre · masa muscular · masa grasa ──
+    if(masaGrasa !== null && masaLibre !== null){
       var pGrasa = grasa.toFixed(1);
-      var pMagra = (100 - grasa).toFixed(1);
+      var pLibre = (100 - grasa).toFixed(1);
       out += '<div class="a2" style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px;margin-bottom:10px">';
       out += '<div style="font-size:9px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px">📊 Composición corporal estimada</div>';
-      out += '<div style="height:18px;border-radius:99px;overflow:hidden;display:flex;gap:2px;margin-bottom:8px">';
-      out += '<div style="flex:'+pMagra+';background:linear-gradient(135deg,'+avCol+','+avCol+'cc);border-radius:99px;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:rgba(255,255,255,.9)">'+pMagra+'%</div>';
-      out += '<div style="flex:'+pGrasa+';background:linear-gradient(135deg,#E8610A,#c2410c);border-radius:99px;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:rgba(255,255,255,.9)">'+pGrasa+'%</div>';
+
+      // Bar: libre de grasa | muscular (subset of libre) shown as overlay conceptually
+      // Simplified: show 3 segments if masaMuscular available
+      if(masaMuscular !== null && peso){
+        var pMuscular = (masaMuscular/peso*100).toFixed(1);
+        var pLibreNoMuscular = Math.max(0,(100 - grasa - parseFloat(pMuscular))).toFixed(1);
+        out += '<div style="height:18px;border-radius:99px;overflow:hidden;display:flex;gap:2px;margin-bottom:8px">';
+        out += '<div style="flex:'+pLibre+';background:linear-gradient(135deg,'+avCol+','+avCol+'cc);border-radius:99px;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:rgba(255,255,255,.9)">'+pLibre+'%</div>';
+        out += '<div style="flex:'+pGrasa+';background:linear-gradient(135deg,#E8610A,#c2410c);border-radius:99px;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:rgba(255,255,255,.9)">'+pGrasa+'%</div>';
+        out += '</div>';
+        out += '<div style="display:flex;gap:10px;flex-wrap:wrap">';
+        out += '<div style="display:flex;align-items:center;gap:5px;font-size:10px;color:var(--muted2)"><div style="width:7px;height:7px;border-radius:50%;background:'+avCol+'"></div>Masa libre de grasa — <span style="font-weight:700;color:var(--text)">'+masaLibre+' kg</span></div>';
+        out += '<div style="display:flex;align-items:center;gap:5px;font-size:10px;color:var(--muted2)"><div style="width:7px;height:7px;border-radius:50%;background:#60a5fa"></div>Masa muscular (est.) — <span style="font-weight:700;color:#60a5fa">'+masaMuscular+' kg</span></div>';
+        out += '<div style="display:flex;align-items:center;gap:5px;font-size:10px;color:var(--muted2)"><div style="width:7px;height:7px;border-radius:50%;background:#E8610A"></div>Masa grasa — <span style="font-weight:700;color:var(--text)">'+masaGrasa+' kg</span></div>';
+        out += '</div>';
+      } else {
+        out += '<div style="height:18px;border-radius:99px;overflow:hidden;display:flex;gap:2px;margin-bottom:8px">';
+        out += '<div style="flex:'+pLibre+';background:linear-gradient(135deg,'+avCol+','+avCol+'cc);border-radius:99px;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:rgba(255,255,255,.9)">'+pLibre+'%</div>';
+        out += '<div style="flex:'+pGrasa+';background:linear-gradient(135deg,#E8610A,#c2410c);border-radius:99px;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:rgba(255,255,255,.9)">'+pGrasa+'%</div>';
+        out += '</div>';
+        out += '<div style="display:flex;gap:10px;flex-wrap:wrap">';
+        out += '<div style="display:flex;align-items:center;gap:5px;font-size:10px;color:var(--muted2)"><div style="width:7px;height:7px;border-radius:50%;background:'+avCol+'"></div>Masa libre de grasa — <span style="font-weight:700;color:var(--text)">'+masaLibre+' kg</span></div>';
+        out += '<div style="display:flex;align-items:center;gap:5px;font-size:10px;color:var(--muted2)"><div style="width:7px;height:7px;border-radius:50%;background:#E8610A"></div>Masa grasa — <span style="font-weight:700;color:var(--text)">'+masaGrasa+' kg</span></div>';
+        out += '</div>';
+        if(masaMuscular === null){
+          out += '<div style="font-size:10px;color:var(--muted);margin-top:6px;font-style:italic">💡 Introduce perímetros (brazo, muslo, pantorrilla) para calcular la masa muscular</div>';
+        }
+      }
       out += '</div>';
-      out += '<div style="display:flex;gap:12px;flex-wrap:wrap">';
-      out += '<div style="display:flex;align-items:center;gap:5px;font-size:10px;color:var(--muted2)"><div style="width:7px;height:7px;border-radius:50%;background:'+avCol+'"></div>Masa magra — <span style="font-weight:700;color:var(--text)">'+masaMagra+' kg</span></div>';
-      out += '<div style="display:flex;align-items:center;gap:5px;font-size:10px;color:var(--muted2)"><div style="width:7px;height:7px;border-radius:50%;background:#E8610A"></div>Masa grasa — <span style="font-weight:700;color:var(--text)">'+masaGrasa+' kg</span></div>';
-      out += '</div></div>';
     }
 
     // ── % GRASA INDICATOR ──
@@ -2043,21 +2091,34 @@ function showPlayerProfile(){
     // ── RANGOS REFERENCIA ──
     out += '<div class="a2" style="background:rgba(255,255,255,.02);border:1px solid var(--border);border-radius:12px;padding:12px">';
     out += '<div style="font-size:9px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px">📋 Rangos referencia — Baloncesto '+(isFem?'femenino':'masculino')+'</div>';
-    function refRow(label, val, color, last){
-      return '<div style="display:flex;justify-content:space-between;align-items:center;padding:5px 0;'+(last?'':' border-bottom:1px solid rgba(255,255,255,.04)')+'">' +
+    function refRow(label, val, refText, color){
+      return '<div style="display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid rgba(255,255,255,.04)">'+
         '<span style="font-size:10px;color:var(--muted2);display:flex;align-items:center;gap:4px"><span style="width:5px;height:5px;border-radius:50%;background:'+color+';display:inline-block"></span>'+label+'</span>'+
         '<span style="font-size:10px;font-weight:700;color:'+color+'">'+val+'</span></div>';
     }
+    var grasaRef = grasa ? grasaColor : 'var(--muted)';
     out += refRow('% Grasa corporal',
       grasa ? grasa+'% <span style="color:var(--muted);font-weight:400">('+grasaMin+'–'+grasaMax+'%)</span>' : '—',
-      grasa ? grasaColor : 'var(--muted)', false);
-    out += refRow('Masa magra', masaMagra ? masaMagra+' kg' : '—', masaMagra?'var(--green)':'var(--muted)', false);
-    out += refRow('Masa grasa', masaGrasa ? masaGrasa+' kg' : '—', masaGrasa?'var(--orange)':'var(--muted)', false);
-    out += refRow('IMC', imc ? imc+' <span style="font-size:9px">(poco relevante)</span>' : '—', 'var(--muted)', true);
+      '', grasaRef);
+    out += refRow('Masa libre de grasa', masaLibre ? masaLibre+' kg' : '—', '', masaLibre?'var(--green)':'var(--muted)');
+    out += refRow('Masa muscular (Lee et al.)', masaMuscular ? masaMuscular+' kg' : '—', '', masaMuscular?'#60a5fa':'var(--muted)');
+    // IMC - last row, no border-bottom
+    out += '<div style="display:flex;justify-content:space-between;align-items:center;padding:5px 0">';
+    out += '<span style="font-size:10px;color:var(--muted2);display:flex;align-items:center;gap:4px"><span style="width:5px;height:5px;border-radius:50%;background:var(--muted);display:inline-block"></span>IMC</span>';
+    out += '<span style="font-size:10px;font-weight:700;color:var(--muted)">'+(imc?imc:'—')+' <span style="font-size:9px">(poco relevante)</span></span>';
+    out += '</div>';
     out += '</div>';
 
     return out;
   }
+  // Enrich currentUser with antro data from dbRec so getDefaultRecos can calculate kcal
+  if(dbRec){
+    if(dbRec.peso   != null) currentUser.peso    = dbRec.peso;
+    if(dbRec.altura != null) currentUser.altura  = dbRec.altura;
+    if(dbRec.grasa  != null) currentUser.grasa   = dbRec.grasa;
+  }
+  // If doctor sent recos but nutricion/suplementacion have no antro data yet
+  // (because antro was added after sending recos) → recalculate from current antro
   var rec = dbRec || {};
   if(currentUser.peso && currentUser.altura){
     var freshDef = getDefaultRecos(currentUser);
@@ -2167,13 +2228,18 @@ function buildMedView(v){
         var pid = this.getAttribute('data-save-antro');
         var uid = this.getAttribute('data-antro-uid');
         function fld(id){ var e=document.getElementById(id); return e&&e.value!==''?parseFloat(e.value):null; }
-        var peso   = fld('antro-peso-'+uid);
-        var altura = fld('antro-altura-'+uid);
-        var grasa  = fld('antro-grasa-'+uid);
+        function str(id){ var e=document.getElementById(id); return e?e.value:null; }
+        var peso    = fld('antro-peso-'+uid);
+        var altura  = fld('antro-altura-'+uid);
+        var grasa   = fld('antro-grasa-'+uid);
+        var brazo   = fld('antro-brazo-'+uid);
+        var muslo   = fld('antro-muslo-'+uid);
+        var pantorr = fld('antro-pantorr-'+uid);
+        var etnia   = str('antro-etnia-'+uid) || 'caucasico';
         if(peso === null && altura === null){ alert('Introduce al menos peso o altura'); return; }
         this.textContent='Guardando...'; this.disabled=true;
         var existing = cache.recos && cache.recos[pid] ? cache.recos[pid] : {};
-        var merged = Object.assign({}, existing, {peso:peso, altura:altura, grasa:grasa});
+        var merged = Object.assign({}, existing, {peso:peso,altura:altura,grasa:grasa,brazo:brazo,muslo:muslo,pantorr:pantorr,etnia:etnia});
         await dbSaveRecos(pid, merged);
         if(!cache.recos) cache.recos={};
         cache.recos[pid] = merged;
@@ -2278,11 +2344,7 @@ function renderMedRecos(){
     c += '</div>';
     // Fields
     sections.forEach(function(s){
-      var rawVal = existingRec[s.key] || '';
-      // If stored value has placeholder text but antro data is now available, use calculated default
-      var val = (rawVal && rawVal.indexOf('Pendiente') < 0 && rawVal.indexOf('1,8-2,2g/kg/día') < 0)
-        ? rawVal
-        : (defRec[s.key] || rawVal || '');
+      var val = existingRec[s.key] || defRec[s.key] || '';
       c += '<div style="margin-bottom:8px">';
       c += '<div style="font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:4px">'+s.label+'</div>';
       c += '<textarea data-reco-pid="'+player.id+'" data-reco-key="'+s.key+'" ';
@@ -2318,39 +2380,72 @@ function calcAge(dob){
   return age;
 }
 
-function calcAntroPreview(uid){
-  var prevEl = document.getElementById('antro-prev-'+uid);
-  if(!prevEl) return;
-  var p = parseFloat((document.getElementById('antro-peso-'+uid)||{}).value)  || NaN;
+function calcAntroIMC(uid){
+  var imcEl = document.getElementById('antro-imc-'+uid);
+  if(!imcEl) return;
+
+  var p = parseFloat((document.getElementById('antro-peso-'+uid)||{}).value) || NaN;
   var h = parseFloat((document.getElementById('antro-altura-'+uid)||{}).value) || NaN;
-  var g = parseFloat((document.getElementById('antro-grasa-'+uid)||{}).value)  || NaN;
+  var g = parseFloat((document.getElementById('antro-grasa-'+uid)||{}).value) || NaN;
+  var br = parseFloat((document.getElementById('antro-brazo-'+uid)||{}).value) || NaN;
+  var mu = parseFloat((document.getElementById('antro-muslo-'+uid)||{}).value) || NaN;
+  var pa = parseFloat((document.getElementById('antro-pantorr-'+uid)||{}).value) || NaN;
+  var etSel = document.getElementById('antro-etnia-'+uid);
+  var etnia = etSel ? etSel.value : 'caucasico';
+  var etniaCorr = etnia==='asiatico' ? -2.0 : etnia==='afroamericano' ? 1.1 : 0;
+
   var parts = [];
+
+  // IMC
   if(!isNaN(p) && p>0 && !isNaN(h) && h>0){
     var imc = (p / Math.pow(h/100, 2)).toFixed(1);
     parts.push('IMC: <strong style="color:var(--fg)">'+imc+'</strong>');
   }
+
+  // Masa grasa y libre de grasa
   if(!isNaN(p) && p>0 && !isNaN(g) && g>0){
-    var mGrasa = +(p * g / 100).toFixed(1);
-    var mMagra = +(p - mGrasa).toFixed(1);
-    parts.push('Masa magra: <strong style="color:var(--green)">'+mMagra+' kg</strong>');
-    parts.push('Masa grasa: <strong style="color:var(--orange)">'+mGrasa+' kg</strong>');
+    var mGrasa  = +(p * g / 100).toFixed(1);
+    var mLibre  = +(p - mGrasa).toFixed(1);
+    parts.push('Grasa: <strong style="color:var(--orange)">'+mGrasa+' kg</strong>');
+    parts.push('Libre de grasa: <strong style="color:var(--green)">'+mLibre+' kg</strong>');
   }
-  prevEl.innerHTML = parts.length ? parts.join(' &nbsp;·&nbsp; ') : '';
+
+  // Lee et al. — masa muscular esquelética
+  // SM(kg) = altura(cm) × (0.00744×brazo² + 0.00088×muslo² + 0.00441×pantorrilla²) + 2.4×sexo − 0.048×edad + etnia + 7.8
+  // sexo: necesitamos buscarlo del jugador; lo guardamos en data-gender del uid
+  if(!isNaN(h) && h>0 && !isNaN(br) && !isNaN(mu) && !isNaN(pa)){
+    // Retrieve gender and age from player data by uid
+    var allPlayers = (typeof ALL_PLAYERS !== 'undefined') ? ALL_PLAYERS : PLAYERS_FEM.concat(PLAYERS_MAS);
+    var pid = uid.replace(/_/g,'.');
+    var plr = allPlayers.find(function(x){ return x.id===pid; });
+    var sexo = plr && plr.gender==='mas' ? 1 : 0;
+    var edad = plr && plr.dob ? calcAge(plr.dob) : 20;
+    var hm = h / 100; // Lee et al. uses height in METERS
+    var sm = hm * (0.00744*br*br + 0.00088*mu*mu + 0.00441*pa*pa) + 2.4*sexo - 0.048*edad + etniaCorr + 7.8;
+    sm = Math.max(0, +sm.toFixed(1));
+    parts.push('Masa muscular (Lee): <strong style="color:#60a5fa">'+sm+' kg</strong>');
+  }
+
+  imcEl.innerHTML = parts.length ? parts.join(' &nbsp;·&nbsp; ') : '';
 }
 
 function renderMedAntro(){
   var out = '<div class="a1"><div class="page-title">Antropometría <em>Jugadores</em></div>';
-  out += '<div class="page-sub">Introduce peso, altura y % grasa — masa magra y masa grasa se calculan automáticamente</div></div>';
+  out += '<div class="page-sub">Introduce los datos para calcular composición corporal (fórmula Lee et al.)</div></div>';
 
   var inputStyle = 'width:100%;padding:9px 10px;background:var(--glass);border:1px solid var(--border);border-radius:10px;font-family:DM Sans,sans-serif;font-size:14px;color:var(--fg);outline:none;box-sizing:border-box';
   var labelStyle = 'font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px';
 
   function renderAntroCard(player){
-    var rec  = cache.recos && cache.recos[player.id] ? cache.recos[player.id] : {};
-    var uid  = player.id.replace(/\./g,'_');
-    var peso   = rec.peso   != null ? rec.peso   : '';
-    var altura = rec.altura != null ? rec.altura : '';
-    var grasa  = rec.grasa  != null ? rec.grasa  : '';
+    var rec   = cache.recos && cache.recos[player.id] ? cache.recos[player.id] : {};
+    var uid   = player.id.replace(/\./g,'_');
+    var peso    = rec.peso    != null ? rec.peso    : '';
+    var altura  = rec.altura  != null ? rec.altura  : '';
+    var grasa   = rec.grasa   != null ? rec.grasa   : '';
+    var brazo   = rec.brazo   != null ? rec.brazo   : '';
+    var muslo   = rec.muslo   != null ? rec.muslo   : '';
+    var pantorr = rec.pantorr != null ? rec.pantorr : '';
+    var etnia   = rec.etnia   != null ? rec.etnia   : 'caucasico';
     var isSaved = (peso !== '' || grasa !== '');
 
     var c = '<div class="reco-player-card a2">';
@@ -2359,26 +2454,46 @@ function renderMedAntro(){
     c += '<div class="p-av" style="'+avColor(player.gender)+';width:38px;height:38px;font-size:13px;flex-shrink:0">'+initials(player.name)+'</div>';
     c += '<div style="flex:1;min-width:0"><div style="font-size:14px;font-weight:700">'+player.name+'</div>';
     c += '<div style="font-size:11px;color:var(--muted)">'+player.club;
+    // Show age from dob
     if(player.dob){ c += ' · '+calcAge(player.dob)+' años'; }
     c += '</div></div>';
     c += '<span id="antro-badge-'+uid+'" style="font-size:10px;font-weight:700;'+(isSaved?'color:var(--green)':'color:var(--muted)')+'">'+
          (isSaved?'✓ Con datos':'Sin datos')+'</span>';
     c += '</div>';
 
-    // 3 fields
+    // ── ROW 1: peso, altura, % grasa ──
     c += '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:10px">';
     c += '<div><div style="'+labelStyle+'">⚖️ Peso (kg)</div>';
-    c += '<input id="antro-peso-'+uid+'" type="number" step="0.1" min="40" max="150" value="'+peso+'" placeholder="ej: 68.0" onchange="calcAntroPreview(\''+uid+'\')" style="'+inputStyle+'"></div>';
+    c += '<input id="antro-peso-'+uid+'" type="number" step="0.1" min="40" max="150" value="'+peso+'" placeholder="ej: 78.5" onchange="calcAntroIMC(\''+uid+'\')" style="'+inputStyle+'"></div>';
     c += '<div><div style="'+labelStyle+'">📏 Altura (cm)</div>';
-    c += '<input id="antro-altura-'+uid+'" type="number" step="1" min="140" max="230" value="'+altura+'" placeholder="ej: 176" onchange="calcAntroPreview(\''+uid+'\')" style="'+inputStyle+'"></div>';
+    c += '<input id="antro-altura-'+uid+'" type="number" step="1" min="140" max="230" value="'+altura+'" placeholder="ej: 180" onchange="calcAntroIMC(\''+uid+'\')" style="'+inputStyle+'"></div>';
     c += '<div><div style="'+labelStyle+'">🔬 % Grasa</div>';
-    c += '<input id="antro-grasa-'+uid+'" type="number" step="0.1" min="3" max="50" value="'+grasa+'" placeholder="ej: 19.0" onchange="calcAntroPreview(\''+uid+'\')" style="'+inputStyle+'"></div>';
+    c += '<input id="antro-grasa-'+uid+'" type="number" step="0.1" min="3" max="50" value="'+grasa+'" placeholder="ej: 11.4" onchange="calcAntroIMC(\''+uid+'\')" style="'+inputStyle+'"></div>';
     c += '</div>';
 
-    // Live preview
-    c += '<div id="antro-prev-'+uid+'" style="margin-top:8px;padding:8px 12px;background:rgba(255,255,255,0.04);border-radius:8px;font-size:12px;color:var(--muted);min-height:32px"></div>';
+    // ── ROW 2: perímetros ──
+    c += '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:8px">';
+    c += '<div><div style="'+labelStyle+'">💪 Brazo relaj. (cm)</div>';
+    c += '<input id="antro-brazo-'+uid+'" type="number" step="0.1" min="15" max="60" value="'+brazo+'" placeholder="ej: 32.5" onchange="calcAntroIMC(\''+uid+'\')" style="'+inputStyle+'"></div>';
+    c += '<div><div style="'+labelStyle+'">🦵 Muslo (cm)</div>';
+    c += '<input id="antro-muslo-'+uid+'" type="number" step="0.1" min="30" max="80" value="'+muslo+'" placeholder="ej: 54.0" onchange="calcAntroIMC(\''+uid+'\')" style="'+inputStyle+'"></div>';
+    c += '<div><div style="'+labelStyle+'">🦶 Pantorrilla (cm)</div>';
+    c += '<input id="antro-pantorr-'+uid+'" type="number" step="0.1" min="20" max="60" value="'+pantorr+'" placeholder="ej: 38.5" onchange="calcAntroIMC(\''+uid+'\')" style="'+inputStyle+'"></div>';
+    c += '</div>';
 
-    // Save button
+    // ── ROW 3: etnia ──
+    c += '<div style="margin-top:8px"><div style="'+labelStyle+'">🌍 Etnia (corrección Lee et al.)</div>';
+    c += '<select id="antro-etnia-'+uid+'" onchange="calcAntroIMC(\''+uid+'\')" style="'+inputStyle+';appearance:none;cursor:pointer">';
+    ['caucasico','asiatico','afroamericano'].forEach(function(v){
+      var lbl = v==='caucasico'?'Caucásico / Hispano (0)':v==='asiatico'?'Asiático (−2.0)':'Afroamericano (+1.1)';
+      c += '<option value="'+v+'"'+(etnia===v?' selected':'')+'>'+lbl+'</option>';
+    });
+    c += '</select></div>';
+
+    // ── LIVE PREVIEW ──
+    c += '<div id="antro-imc-'+uid+'" style="margin-top:8px;padding:8px 12px;background:rgba(255,255,255,0.04);border-radius:8px;font-size:12px;color:var(--muted);min-height:32px"></div>';
+
+    // ── SAVE BUTTON ──
     c += '<button data-save-antro="'+player.id+'" data-antro-uid="'+uid+'"'+
          ' style="width:100%;padding:12px;background:linear-gradient(135deg,var(--red),var(--orange));border:none;border-radius:10px;'+
          'font-family:DM Sans,sans-serif;font-size:13px;font-weight:700;color:#fff;cursor:pointer;margin-top:10px">';
