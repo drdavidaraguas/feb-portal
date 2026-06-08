@@ -1601,6 +1601,7 @@ async function doLogin(){
         buildMedView('hoy');
         showScreen('s-medical');
       } else {
+        await loadWellnessCache();
         buildStaffView();
         showScreen('s-staff');
       }
@@ -1715,7 +1716,7 @@ function renderWellnessForm(){
 
   const cards = [
     {key:'sueno',   icon:'😴', bg:'rgba(168,85,247,.15)', title:'Calidad del Sueño',   sub:'¿Cómo has dormido esta noche?',    emojis:['😣','😟','😐','🙂','😊'], labels:['Muy mal','Mal','Regular','Bien','Muy bien']},
-    {key:'energia', icon:'⚡', bg:'rgba(245,166,35,.15)', title:'Nivel de Energía',     sub:'¿Cómo te sientes físicamente hoy?', emojis:['🪫','😓','😐','💪','🍎'], labels:['Sin energía','Bajo','Normal','Bien','Excelente']},
+    {key:'energia', icon:'⚡', bg:'rgba(245,166,35,.15)', title:'Nivel de Energía',     sub:'¿Cómo te sientes físicamente hoy?', emojis:['🪫','😓','😐','💪','🔋'], labels:['Sin energía','Bajo','Normal','Bien','Excelente']},
     {key:'dolor',   icon:'🩹', bg:'rgba(200,16,46,.15)',  title:'Dolor / Molestias',    sub:'¿Tienes alguna molestia física?',   emojis:['😄','🙂','😐','😟','😣'], labels:['Sin dolor','Leve','Moderado','Intenso','Muy intenso']},
     {key:'animo',   icon:'🧠', bg:'rgba(34,197,94,.15)',  title:'Estado de Ánimo',      sub:'¿Cómo estás mentalmente hoy?',      emojis:['😞','😟','😐','🙂','😁'], labels:['Muy bajo','Bajo','Normal','Bien','Excelente']},
   ];
@@ -2615,7 +2616,7 @@ async function buildStaffView(){
     var ind=getIndicacion(p.id);
     var fisioNota=getFisioNote(p.id), fisioTime=getFisioNoteTime(p.id);
     var bc=sem==='rojo'?'rojo-border':sem==='amarillo'?'amarillo-border':sem==='verde'?'verde-border':'';
-    var c='<div class="staff-player-card '+bc+' '+anim+'">';
+    var c='<div class="staff-player-card '+bc+' '+anim+'" data-pid="'+p.id+'" style="cursor:pointer">';
     c+='<div class="p-av" style="'+avColor(p.gender)+'">'+initials(p.name)+'</div>';
     c+='<div class="p-info" style="width:100%;min-width:0">';
     c+='<div class="p-name">'+p.name+'</div>';
@@ -2664,6 +2665,14 @@ async function buildStaffView(){
   html+='<div style="height:8px"></div>';
   el.innerHTML=html;
 
+  // Click on player card → open wellness modal (read-only for fisio)
+  el.onclick=function(e){
+    var card=e.target.closest('[data-pid]');
+    if(card && !e.target.closest('input,button,select,textarea')){
+      openModal(card.getAttribute('data-pid'));
+    }
+  };
+
   if(isFisio){
     el.querySelectorAll('[data-fisio-save]').forEach(function(btn){
       btn.addEventListener('click',async function(){
@@ -2682,6 +2691,14 @@ async function buildStaffView(){
   showScreen('s-staff');
   html+='<div style="height:8px"></div>';
   el.innerHTML=html;
+
+  // Click on player card → open wellness modal (read-only for fisio)
+  el.onclick=function(e){
+    var card=e.target.closest('[data-pid]');
+    if(card && !e.target.closest('input,button,select,textarea')){
+      openModal(card.getAttribute('data-pid'));
+    }
+  };
 
   if(isFisio){
     el.querySelectorAll('[data-fisio-save]').forEach(function(btn){
