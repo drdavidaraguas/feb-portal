@@ -1412,9 +1412,12 @@ async function dbSetOverride(userId, sem, indicacion){
   await withTimeout(sb.from('overrides').upsert(update), 7000);
 }
 async function dbGetFisioNotes(){
-  const data = await withTimeout(sb.from('fisio_notes').select('*').then(r=>r.data), 7000, []);
+  const data = await withTimeout(sb.from('fisio_notes').select('*').order('fecha',{ascending:false}).then(r=>r.data), 7000, []);
   const map = {};
-  (data||[]).forEach(r=>{ map[r.user_id] = r; });
+  (data||[]).forEach(r=>{
+    if(!map[r.user_id]) map[r.user_id] = [];
+    map[r.user_id].push(r);
+  });
   return map;
 }
 async function dbSaveFisioNote(userId, nota, fisioId){
@@ -1422,7 +1425,7 @@ async function dbSaveFisioNote(userId, nota, fisioId){
     user_id: userId, nota: nota, fisio_id: fisioId,
     hora: new Date().toLocaleTimeString('es',{hour:'2-digit',minute:'2-digit'}),
     fecha: todayStr(), updated_at: new Date().toISOString()
-  }), 7000);
+  },{onConflict:'user_id,fecha'}), 7000);
 }
 
 // Load all data into cache
@@ -1499,11 +1502,20 @@ function getEffectiveSem(playerId){
 function getIndicacion(playerId){
   return (cache.overrides[playerId]||{}).indicacion||'';
 }
+function getFisioNoteToday(playerId){
+  var notes = cache.fisioNotes[playerId]||[];
+  return notes.find(function(n){ return n.fecha===todayStr(); }) || null;
+}
 function getFisioNote(playerId){
-  return (cache.fisioNotes[playerId]||{}).nota||'';
+  var n = getFisioNoteToday(playerId);
+  return n ? n.nota||'' : '';
 }
 function getFisioNoteTime(playerId){
-  return (cache.fisioNotes[playerId]||{}).hora||'';
+  var n = getFisioNoteToday(playerId);
+  return n ? n.hora||'' : '';
+}
+function getFisioNoteHistory(playerId){
+  return (cache.fisioNotes[playerId]||[]).slice(); // all notes, newest first
 }
 
 // ═══════════════════════════════════════════
@@ -2496,11 +2508,18 @@ function openModal(playerId){
       out+='</div></div>';
     }
 
-    var fisioNota=getFisioNote(playerId), fisioTime=getFisioNoteTime(playerId);
-    if(fisioNota){
+    var fisioHistory=getFisioNoteHistory(playerId);
+    if(fisioHistory.length){
       out+='<div style="background:rgba(20,184,166,.06);border:1px solid rgba(20,184,166,.2);border-radius:12px;padding:12px 14px;margin-bottom:14px">';
-      out+='<div style="font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--teal);margin-bottom:6px">🤲 Fisioterapeuta · '+fisioTime+'</div>';
-      out+='<div style="font-size:13px;color:var(--text);line-height:1.5">'+fisioNota+'</div></div>';
+      out+='<div style="font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--teal);margin-bottom:8px">🤲 Notas de Fisioterapeuta</div>';
+      fisioHistory.forEach(function(n){
+        if(!n.nota) return;
+        out+='<div style="padding:6px 0;border-bottom:1px solid rgba(20,184,166,.1)">';
+        out+='<div style="font-size:10px;color:var(--teal);font-weight:600;margin-bottom:2px">'+n.fecha+(n.hora?' · '+n.hora:'')+'</div>';
+        out+='<div style="font-size:13px;color:var(--text);line-height:1.5">'+n.nota+'</div>';
+        out+='</div>';
+      });
+      out+='</div>';
     }
 
     out+='<div style="font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:10px">Historial de Wellness</div>';
@@ -2681,7 +2700,13 @@ async function buildStaffView(){
         if(inp){
           this.textContent='Guardando...'; this.disabled=true;
           await dbSaveFisioNote(pid, inp.value.trim(), currentUser.id);
-          cache.fisioNotes[pid]={nota:inp.value.trim(),hora:new Date().toLocaleTimeString('es',{hour:'2-digit',minute:'2-digit'})};
+          var _nota=inp.value.trim();
+          var _hora=new Date().toLocaleTimeString('es',{hour:'2-digit',minute:'2-digit'});
+          var _hoy=todayStr();
+          if(!cache.fisioNotes[pid]) cache.fisioNotes[pid]=[];
+          var _entry=cache.fisioNotes[pid].find(function(n){return n.fecha===_hoy;});
+          if(_entry){_entry.nota=_nota;_entry.hora=_hora;}
+          else{cache.fisioNotes[pid].unshift({nota:_nota,hora:_hora,fecha:_hoy,fisio_id:currentUser.id});}
           this.textContent='✓'; this.style.background='var(--green)';
           setTimeout(()=>buildStaffView(), 500);
         }
@@ -2708,7 +2733,13 @@ async function buildStaffView(){
         if(inp){
           this.textContent='Guardando...'; this.disabled=true;
           await dbSaveFisioNote(pid, inp.value.trim(), currentUser.id);
-          cache.fisioNotes[pid]={nota:inp.value.trim(),hora:new Date().toLocaleTimeString('es',{hour:'2-digit',minute:'2-digit'})};
+          var _nota=inp.value.trim();
+          var _hora=new Date().toLocaleTimeString('es',{hour:'2-digit',minute:'2-digit'});
+          var _hoy=todayStr();
+          if(!cache.fisioNotes[pid]) cache.fisioNotes[pid]=[];
+          var _entry=cache.fisioNotes[pid].find(function(n){return n.fecha===_hoy;});
+          if(_entry){_entry.nota=_nota;_entry.hora=_hora;}
+          else{cache.fisioNotes[pid].unshift({nota:_nota,hora:_hora,fecha:_hoy,fisio_id:currentUser.id});}
           this.textContent='✓'; this.style.background='var(--green)';
           setTimeout(()=>buildStaffView(), 500);
         }
